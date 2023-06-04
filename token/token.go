@@ -1,39 +1,51 @@
 package token
 
-
 // トークンの種類を定義する
 const (
-	ILLEGAL   = "ILLEGAL" // 規則違反
-	EOF       = "EOF"     // ファイルの終端
+	ILLEGAL = "ILLEGAL" // 規則違反
+	EOF     = "EOF"     // ファイルの終端
 
 	// 識別子(変数名・関数名) : ユーザが宣言する名前
-	IDENT     = "IDENT"
+	IDENT = "IDENT"
 
 	// リテラル : 扱うデータの型
-	INT       = "INT"
+	INT = "INT"
 
 	// 演算子 : 使用できる演算子
-	ASSIGN    = "="
-	PLUS      = "+"
+	ASSIGN   = "="
+	PLUS     = "+"
+	MINUS    = "-"
+	BANG     = "!"
+	ASTERISK = "*"
+	SLASH    = "/"
+
+	// 比較演算子 : 使用できる比較演算子
+	EQ     = "=="
+	NOT_EQ = "!="
+	LT     = "<"
+	GT     = ">"
 
 	// デリミタ(区切り文字) : コード上の区切り文字
 	COMMA     = ","
 	SEMICOLON = ";"
 
-	LPAREN    = "("
-	RPAREN    = ")"
+	LPAREN = "("
+	RPAREN = ")"
 
-	LBRACE    = "{"
-	RBRACE    = "}"
+	LBRACE = "{"
+	RBRACE = "}"
 
 	// キーワード : コード上で使用する予約語
-	FUNCTION  = "FUNCTION" // 関数定義
-	LET       = "LET"      // 変数定義
+	FUNCTION = "FUNCTION" // 関数定義
+	LET      = "LET"      // 変数定義
+	TRUE     = "TRUE"     // 真
+	FALSE    = "FALSE"    // 偽
+	IF       = "IF"       // 構文構造使用: 条件分岐
+	ELSE     = "ELSE"     // 構文構造使用: 条件分岐
+	RETURN   = "RETURN"   // 構文構造使用: 関数からの戻り値
 )
 
-
 type TokenType string
-
 
 // トークンを表す構造体
 type Token struct {
@@ -41,13 +53,16 @@ type Token struct {
 	Literal string    // トークン文字列
 }
 
-
 // 予約語のマップ
-var keywords = map[string]TokenType {
-	"fn": FUNCTION,
-	"let": LET,
+var keywords = map[string]TokenType{
+	"fn":     FUNCTION,
+	"let":    LET,
+	"true":   TRUE,
+	"false":  FALSE,
+	"if":     IF,
+	"else":   ELSE,
+	"return": RETURN,
 }
-
 
 /**
  * 名前: LookupIdent

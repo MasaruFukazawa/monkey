@@ -1,10 +1,9 @@
 package main
 
 import (
-    "fmt"
-	"github.com/MasaruFukazawa/monkey-lang/token"
+	"fmt"
 )
 
 func main() {
-    fmt.Println("Hello World")
+	fmt.Println("Hello World")
 }

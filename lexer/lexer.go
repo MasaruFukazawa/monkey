@@ -1,25 +1,22 @@
 package lexer
 
-
 import (
 	"github.com/MasaruFukazawa/monkey-lang/token"
 )
 
-
 type Lexer struct {
-	input string
-	position int     // 入力における現在の位置 : 現在の文字を指し示す
-	readPosition int // これから読み込む位置 : 現在の文字の次を指し示す
-	ch byte          // 現在検査中の文字
+	input        string
+	position     int  // 入力における現在の位置 : 現在の文字を指し示す
+	readPosition int  // これから読み込む位置 : 現在の文字の次を指し示す
+	ch           byte // 現在検査中の文字
 }
-
 
 /**
  * 名前: New
  * 処理: Lexer構造体のポインタを返す
  * 引数: input : ソースコード文字列
  * 戻値: *Lexer
- */ 
+ */
 func New(input string) *Lexer {
 
 	// lexer構造体のポインタを返す
@@ -31,17 +28,15 @@ func New(input string) *Lexer {
 	return l
 }
 
-
- /**
-  * 名前: newToken
-  * 処理: トークン構造体を生成する
-  * 引数: トークンの種類, トークンの文字
-  * 戻値: トークン構造体
-  */
-  func newToken(tokenType token.TokenType, ch byte) token.Token {
+/**
+ * 名前: newToken
+ * 処理: トークン構造体を生成する
+ * 引数: トークンの種類, トークンの文字
+ * 戻値: トークン構造体
+ */
+func newToken(tokenType token.TokenType, ch byte) token.Token {
 	return token.Token{Type: tokenType, Literal: string(ch)}
 }
-
 
 /**
  * 関数名: readChar
@@ -64,14 +59,13 @@ func (l *Lexer) readChar() {
 	l.readPosition += 1
 }
 
-
 /**
  * 関数名: NextToken
  * 処理: 1文字読み込み、その文字のトークン構造体データを返す
  * 引数: なし
  * 戻値: トークン構造体データ
  */
- func (l *Lexer) NextToken() token.Token {
+func (l *Lexer) NextToken() token.Token {
 
 	var tok token.Token
 
@@ -82,7 +76,37 @@ func (l *Lexer) readChar() {
 	// .. default 以外は、1文字で意味が完結するトークン
 	switch l.ch {
 	case '=':
-		tok = newToken(token.ASSIGN, l.ch)
+		// 1文字前を覗き見する
+		if l.peekChar() == '=' {
+			ch := l.ch
+			l.readChar()
+			literal := string(ch) + string(l.ch)
+			tok = token.Token{Type: token.EQ, Literal: literal}
+		} else {
+			tok = newToken(token.ASSIGN, l.ch)
+		}
+	case '+':
+		tok = newToken(token.PLUS, l.ch)
+	case '-':
+		tok = newToken(token.MINUS, l.ch)
+	case '!':
+		// 1文字前を覗き見する
+		if l.peekChar() == '=' {
+			ch := l.ch
+			l.readChar()
+			literal := string(ch) + string(l.ch)
+			tok = token.Token{Type: token.NOT_EQ, Literal: literal}
+		} else {
+			tok = newToken(token.BANG, l.ch)
+		}
+	case '/':
+		tok = newToken(token.SLASH, l.ch)
+	case '*':
+		tok = newToken(token.ASTERISK, l.ch)
+	case '<':
+		tok = newToken(token.LT, l.ch)
+	case '>':
+		tok = newToken(token.GT, l.ch)
 	case ';':
 		tok = newToken(token.SEMICOLON, l.ch)
 	case '(':
@@ -91,8 +115,6 @@ func (l *Lexer) readChar() {
 		tok = newToken(token.RPAREN, l.ch)
 	case ',':
 		tok = newToken(token.COMMA, l.ch)
-	case '+':
-		tok = newToken(token.PLUS, l.ch)
 	case '{':
 		tok = newToken(token.LBRACE, l.ch)
 	case '}':
@@ -115,16 +137,16 @@ func (l *Lexer) readChar() {
 
 			return tok
 
-		// 文字が数字である限り、整数として読み込む
+			// 文字が数字である限り、整数として読み込む
 		} else if isDigit(l.ch) {
-			
+
 			// 整数を取得する
 			tok.Type = token.INT
 			tok.Literal = l.readNumber()
 
 			return tok
 
-		// 英字でない場合、規則違反とする
+			// 英字でない場合、規則違反とする
 		} else {
 			tok = newToken(token.ILLEGAL, l.ch)
 		}
@@ -135,15 +157,15 @@ func (l *Lexer) readChar() {
 	l.readChar()
 
 	return tok
- }
+}
 
 /**
  * 名前: readIdentifier
  * 処理: 識別子(変数名・関数名)を読み込む
  * 引数: なし
  * 戻値: 識別子(変数名・関数名)
- */ 
- func (l *Lexer) readIdentifier() string {
+ */
+func (l *Lexer) readIdentifier() string {
 
 	// 識別子(変数名・関数名)の開始位置を記憶
 	position := l.position
@@ -158,20 +180,7 @@ func (l *Lexer) readChar() {
 	// 識別子(変数名・関数名)を返す
 	// .. 英字のみの文字列を返す
 	return l.input[position:l.position]
- }
-
-
-/**
- * 名前: isLetter
- * 処理: 文字が英字かどうかを判定する
- * 引数: 文字
- * 戻値: bool
- */
-func isLetter(ch byte) bool {
-	// 英字（大文字小文字）、_ であればtrueを返す
-	return 'a' <= ch && ch <= 'z' || 'A' <= ch && ch <= 'Z' || ch == '_'
 }
-
 
 /**
  * 名前: skipWhitespace
@@ -213,6 +222,32 @@ func (l *Lexer) readNumber() string {
 	return l.input[position:l.position]
 }
 
+/**
+ * 名前: peekChar
+ * 処理: 次の文字を読み込む。ただし、読み込み位置は進めない
+ * 引数: なし
+ * 戻り値: なし
+ */
+func (l *Lexer) peekChar() byte {
+
+	if l.readPosition >= len(l.input) {
+		return 0
+	} else {
+		return l.input[l.readPosition]
+	}
+
+}
+
+/**
+ * 名前: isLetter
+ * 処理: 文字が英字かどうかを判定する
+ * 引数: 文字
+ * 戻値: bool
+ */
+func isLetter(ch byte) bool {
+	// 英字（大文字小文字）、_ であればtrueを返す
+	return 'a' <= ch && ch <= 'z' || 'A' <= ch && ch <= 'Z' || ch == '_'
+}
 
 /**
  * 名前: isDigit
