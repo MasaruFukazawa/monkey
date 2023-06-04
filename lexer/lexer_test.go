@@ -1,3 +1,8 @@
+/**
+ * パッケージ名: lexer
+ * ファイル名: lexer_test.go
+ * 概要: 字句解析器のテストを実装する
+ */
 package lexer
 
 import (
