@@ -11,8 +11,8 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/MasaruFukazawa/monkey-lang/lexer"
-	"github.com/MasaruFukazawa/monkey-lang/token"
+	"github.com/MasaruFukazawa/monkey-lang/src/lexer"
+	"github.com/MasaruFukazawa/monkey-lang/src/token"
 )
 
 const PROMPT = ">> "

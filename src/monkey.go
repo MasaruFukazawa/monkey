@@ -5,7 +5,7 @@ import (
 	"os"
 	"os/user"
 
-	"github.com/MasaruFukazawa/monkey-lang/repl"
+	"github.com/MasaruFukazawa/monkey-lang/src/repl"
 )
 
 func main() {

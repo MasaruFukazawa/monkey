@@ -8,7 +8,7 @@ package lexer
 import (
 	"testing"
 
-	"github.com/MasaruFukazawa/monkey-lang/token"
+	"github.com/MasaruFukazawa/monkey-lang/src/token"
 )
 
 func TestNextToken(t *testing.T) {
@@ -16,11 +16,11 @@ func TestNextToken(t *testing.T) {
 	// テストデータとなる文字列を定義
 	input := `let five = 5;
 let ten = 10;
-	
+
 let add = fn(x, y) {
 	x + y;
 };
-		
+
 let result = add(five, ten);
 !-/*5;
 5 < 10 > 5;
