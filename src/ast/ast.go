@@ -56,10 +56,34 @@ func (ls *LetStatement) TokenLiteral() string {
 	return ls.Token.Literal
 }
 
+// Return文を表すノード
+type ReturnStatement struct {
+	Token       token.Token // 'return' トークン
+	ReturnValue Expression  // return文の返り値
+}
+
+/**
+ * 名前: ReturnStatement.statementNode
+ * 概要:
+ *	Return文のトークンリテラルを返す
+ *  Statementインターフェースを満たす
+ */
+func (rs *ReturnStatement) statementNode() {}
+
 // 識別子(変数名・関数名)を表すノード
 type Identifier struct {
 	Token token.Token // token.IDENT トークン
 	Value string      // 変数名
+}
+
+/**
+ * 名前: ReturnStatement.TokenLiteral
+ * 概要:
+ *	Return文のトークンリテラルを返す
+ *  TokenLiteralインターフェースを満たす
+ */
+func (rs *ReturnStatement) TokenLiteral() string {
+	return rs.Token.Literal
 }
 
 /**
