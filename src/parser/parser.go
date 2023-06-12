@@ -13,12 +13,27 @@ import (
 	"github.com/MasaruFukazawa/monkey-lang/src/token"
 )
 
+// 優先順位の定義
+// 下の宣言を2つに分けると以下のようになる
+// .. type prefixParseFn func() ast.Expression
+// .. type infixParseFn func(ast.Expression) ast.Expression
+type (
+	// 前置構文解析関数
+	prefixParseFn func() ast.Expression
+	// 中置構文解析関数
+	infixParseFn func(ast.Expression) ast.Expression
+)
+
 // 構文解析器を表す構造体
 type Parser struct {
-	l         *lexer.Lexer
+	l      *lexer.Lexer
+	errors []string
+
 	curToken  token.Token
 	peekToken token.Token
-	errors    []string
+
+	prefixParseFns map[token.TokenType]prefixParseFn
+	infixParseFns  map[token.TokenType]infixParseFn
 }
 
 /**
@@ -217,4 +232,24 @@ func (p *Parser) peekError(t token.TokenType) {
 
 	// エラーを追加
 	p.errors = append(p.errors, msg)
+}
+
+/**
+ * 名前: Parser.registerPrefix
+ * 概要: 引数のトークンタイプに対応する前置構文解析関数を登録する
+ * 引数: token.TokenType, func() ast.Expression
+ * 戻値: なし
+ */
+func (p *Parser) registerPrefix(tokenType token.TokenType, fn prefixParseFn) {
+	p.prefixParseFns[tokenType] = fn
+}
+
+/**
+ * 名前: Parser.registerInfix
+ * 概要: 引数のトークンタイプに対応する中置構文解析関数を登録する
+ * 引数: token.TokenType, func(ast.Expression) ast.Expression
+ * 戻値: なし
+ */
+func (p *Parser) registerInfix(tokenType token.TokenType, fn infixParseFn) {
+	p.infixParseFns[tokenType] = fn
 }
