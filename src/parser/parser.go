@@ -13,6 +13,24 @@ import (
 	"github.com/MasaruFukazawa/monkey-lang/src/token"
 )
 
+const (
+	_ int = iota
+	// LOWEST: 優先順位の最低値
+	LOWEST
+	// EQUALS: ==
+	EQUALS
+	// LESSGREATER: > または <
+	LESSGREATER
+	// SUM: +
+	SUM
+	// PRODUCT: *
+	PRODUCT
+	// PREFIX: -X または !X
+	PREFIX
+	// CALL: myFunction(X)
+	CALL
+)
+
 // 優先順位の定義
 // 下の宣言を2つに分けると以下のようになる
 // .. type prefixParseFn func() ast.Expression
@@ -48,6 +66,12 @@ func New(l *lexer.Lexer) *Parser {
 		l:      l,
 		errors: []string{},
 	}
+
+	// 前置構文解析関数のマップを初期化
+	p.prefixParseFns = make(map[token.TokenType]prefixParseFn)
+
+	// 前置構文解析関数のマップに関数を登録
+	p.registerPrefix(token.IDENT, p.parseIdentifier)
 
 	p.nextToken()
 	p.nextToken()
@@ -108,12 +132,12 @@ func (p *Parser) ParseProgram() *ast.Program {
 func (p *Parser) parseStatement() ast.Statement {
 
 	switch p.curToken.Type {
-	case token.LET:
+	case token.LET: // let
 		return p.parseLetStatement()
-	case token.RETURN:
+	case token.RETURN: // return
 		return p.parseReturnStatement()
 	default:
-		return nil
+		return p.parseExpressionStatement()
 	}
 }
 
@@ -169,6 +193,61 @@ func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
 	}
 
 	return stmt
+}
+
+/**
+ * 名前: Parser.parseExpressionStatement
+ * 処続: 構文解析を行う
+ * 引数: なし
+ * 戻値: ast.ExpressionStatement
+ */
+func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {
+
+	// expressionを持つast.ExpressionStatementのポインタを生成
+	stmt := &ast.ExpressionStatement{Token: p.curToken}
+
+	// 式を構文解析する
+	stmt.Expression = p.parseExpression(LOWEST)
+
+	// セミコロンに遭遇するまで式を読み飛ばす
+	if p.peekTokenIs(token.SEMICOLON) {
+		p.nextToken()
+	}
+
+	return stmt
+}
+
+/**
+ * 名前: Parser.parseExpression
+ * 処続: 構文解析を行う
+ * 引数: int
+ * 戻値: ast.Expression
+ */
+func (p *Parser) parseExpression(precedence int) ast.Expression {
+
+	// 前置構文解析関数を取得
+	prefix := p.prefixParseFns[p.curToken.Type]
+
+	// 前置構文解析関数がnilであればnilを返す
+	if prefix == nil {
+		return nil
+	}
+
+	// 前置構文解析関数を実行
+	leftExp := prefix()
+
+	return leftExp
+}
+
+/**
+ * 名前: Parser.parseIdentifier
+ * 処続: 構文解析を行う
+ * 引数: なし
+ * 戻値: ast.Expression
+ */
+func (p *Parser) parseIdentifier() ast.Expression {
+	// IDENTを持つast.Identifierポインタを生成
+	return &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
 }
 
 /**

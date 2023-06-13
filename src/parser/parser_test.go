@@ -132,6 +132,47 @@ return 993322;
 }
 
 /**
+ * 名前: TestIdentifierExpression
+ * 概要: 識別子式のテストを実装する
+ * 引数: t *testing.T
+ * 戻り値:
+ */
+func TestIdentifierExpression(t *testing.T) {
+
+	input := "foobar;"
+
+	l := lexer.New(input)
+
+	p := New(l)
+
+	program := p.ParseProgram()
+
+	checkParserErrors(t, p)
+
+	// program.Statementsの長さが1でないことを確認
+	if len(program.Statements) != 1 {
+		t.Fatalf("program has not enough statements. got=%d", len(program.Statements))
+	}
+
+	// program.Statements[0]がast.ExpressionStatementであることを確認
+	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+
+	if !ok {
+		t.Fatalf("program.Statements[0] is not ast.ExpressionStatement. got=%T", program.Statements[0])
+	}
+
+	ident, ok := stmt.Expression.(*ast.Identifier)
+
+	if ident.Value != "foobar" {
+		t.Errorf("ident.Value not %s. got=%s", "foobar", ident.Value)
+	}
+
+	if ident.TokenLiteral() != "foobar" {
+		t.Errorf("ident.TokenLiteral() not %s. got=%s", "foobar", ident.TokenLiteral())
+	}
+}
+
+/**
  * 名前: checkParserErrors
  * 処理: パーサーのエラーをチェックする
  * 引数:
