@@ -172,14 +172,61 @@ func TestIdentifierExpression(t *testing.T) {
 	}
 }
 
-/**
- * 名前: checkParserErrors
- * 処理: パーサーのエラーをチェックする
- * 引数:
- * .. t *testing.T: テスト
- * .. p *Parser: パーサー
+/*
+ * 名前: TestIntegerLiteralExpression
+ * 処理: 整数リテラル式のテストを実装する
+ * 引数: t *testing.T
  * 戻り値:
  */
+func TestIntegerLiteralExpression(t *testing.T) {
+
+	input := "5;"
+
+	l := lexer.New(input)
+
+	p := New(l)
+
+	program := p.ParseProgram()
+
+	checkParserErrors(t, p)
+
+	// program.Statementsの長さが1でないことを確認
+	if len(program.Statements) != 1 {
+		t.Fatalf("program has not enough statements. got=%d", len(program.Statements))
+	}
+
+	// program.Statements[0]がast.ExpressionStatementであることを確認
+	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+
+	if !ok {
+		t.Fatalf("program.Statements[0] is not ast.ExpressionStatement. got=%T", program.Statements[0])
+	}
+
+	literal, ok := stmt.Expression.(*ast.IntegerLiteral)
+
+	if !ok {
+		t.Fatalf("exp not *ast.IntegerLiteral. got=%T", stmt.Expression)
+	}
+
+	if literal.Value != 5 {
+		t.Errorf("literal.Value not %d. got=%d", 5, literal.Value)
+	}
+
+	if literal.TokenLiteral() != "5" {
+		t.Errorf("literal.TokenLiteral not %s. got=%s", "5", literal.TokenLiteral())
+	}
+
+}
+
+/*
+*
+  - 名前: checkParserErrors
+  - 処理: パーサーのエラーをチェックする
+  - 引数:
+  - .. t *testing.T: テスト
+  - .. p *Parser: パーサー
+  - 戻り値:
+*/
 func checkParserErrors(t *testing.T, p *Parser) {
 
 	errors := p.Errors()

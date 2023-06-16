@@ -206,6 +206,40 @@ func (i *Identifier) String() string {
 	return i.Value
 }
 
+// 整数リテラルを表すノード
+type IntegerLiteral struct {
+	Token token.Token // token.INT トークン
+	Value int64       // 整数リテラルの値
+}
+
+/**
+ * 名前: IntegerLiteral.expressionNode
+ * 概要:
+ *	整数リテラルのトークンリテラルを返す
+ *	Expressionインターフェースを満たす
+ */
+func (il *IntegerLiteral) expressionNode() {}
+
+/**
+ * 名前: IntegerLiteral.TokenLiteral
+ * 概要:
+ *	整数リテラルのトークンリテラルを返す
+ *	TokenLiteralインターフェースを満たす
+ */
+func (il *IntegerLiteral) TokenLiteral() string {
+	return il.Token.Literal
+}
+
+/**
+ * 名前: IntegerLiteral.String
+ * 概要:
+ *	整数リテラルのトークンリテラルを返す
+ *	Nodeインターフェースを満たす
+ */
+func (il *IntegerLiteral) String() string {
+	return il.Token.Literal
+}
+
 // プログラム全体を表すノード
 type Program struct {
 

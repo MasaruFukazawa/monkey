@@ -7,6 +7,7 @@ package parser
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/MasaruFukazawa/monkey-lang/src/ast"
 	"github.com/MasaruFukazawa/monkey-lang/src/lexer"
@@ -72,6 +73,9 @@ func New(l *lexer.Lexer) *Parser {
 
 	// 前置構文解析関数のマップに関数を登録
 	p.registerPrefix(token.IDENT, p.parseIdentifier)
+
+	// 前置構文解析関数のマップに関数を登録
+	p.registerPrefix(token.INT, p.parseIntegerLiteral)
 
 	p.nextToken()
 	p.nextToken()
@@ -331,4 +335,32 @@ func (p *Parser) registerPrefix(tokenType token.TokenType, fn prefixParseFn) {
  */
 func (p *Parser) registerInfix(tokenType token.TokenType, fn infixParseFn) {
 	p.infixParseFns[tokenType] = fn
+}
+
+/**
+ * 名前: Parser.parseIntegerLiteral
+ * 概要: 整数リテラルを構文解析する
+ * 引数: なし
+ * 戻値: ast.Expression
+ */
+func (p *Parser) parseIntegerLiteral() ast.Expression {
+
+	lit := &ast.IntegerLiteral{Token: p.curToken}
+
+	// 文字列をint64に変換
+	value, err := strconv.ParseInt(p.curToken.Literal, 0, 64)
+
+	// エラーが発生した場合はエラーを追加
+	if err != nil {
+		msg := fmt.Sprintf("could not parse %q as integer", p.curToken.Literal)
+		p.errors = append(p.errors, msg)
+
+		// nilを返す
+		return nil
+	}
+
+	// 整数リテラルの値を設定
+	lit.Value = value
+
+	return lit
 }
