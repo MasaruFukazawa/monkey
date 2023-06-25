@@ -283,6 +283,51 @@ func (pe *PrefixExpression) String() string {
 	return out.String()
 }
 
+// z中置演算子を表すノード
+type InfixExpression struct {
+	Token    token.Token // 演算子トークン、例えば「+」
+	Left     Expression  // 左側の式
+	Operator string      // 演算子
+	Right    Expression  // 右側の式
+}
+
+/**
+ * 名前: InfixExpression.expressionNode
+ * 概要:
+ *	中置演算子のトークンリテラルを返す
+ *	Expressionインターフェースを満たす
+ */
+func (oe *InfixExpression) expressionNode() {}
+
+/**
+ * 名前: InfixExpression.TokenLiteral
+ * 概要:
+ *	中置演算子のトークンリテラルを返す
+ *	TokenLiteralインターフェースを満たす
+ */
+func (oe *InfixExpression) TokenLiteral() string {
+	return oe.Token.Literal
+}
+
+/**
+ * 名前: InfixExpression.String
+ * 概要:
+ *	中置演算子のトークンリテラルを返す
+ *	Nodeインターフェースを満たす
+ */
+func (oe *InfixExpression) String() string {
+
+	var out bytes.Buffer
+
+	out.WriteString("(")
+	out.WriteString(oe.Left.String())
+	out.WriteString(" " + oe.Operator + " ")
+	out.WriteString(oe.Right.String())
+	out.WriteString(")")
+
+	return out.String()
+}
+
 // プログラム全体を表すノード
 type Program struct {
 

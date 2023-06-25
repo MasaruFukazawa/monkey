@@ -32,6 +32,18 @@ const (
 	CALL
 )
 
+// 優先順位のマップ
+var precedences = map[token.TokenType]int{
+	token.EQ:       EQUALS,      // ==
+	token.NOT_EQ:   EQUALS,      // !=
+	token.LT:       LESSGREATER, // <
+	token.GT:       LESSGREATER, // >
+	token.PLUS:     SUM,         // +
+	token.MINUS:    SUM,         // -
+	token.SLASH:    PRODUCT,     // /
+	token.ASTERISK: PRODUCT,     // *
+}
+
 // 優先順位の定義
 // 下の宣言を2つに分けると以下のようになる
 // .. type prefixParseFn func() ast.Expression
@@ -82,6 +94,16 @@ func New(l *lexer.Lexer) *Parser {
 
 	// MINUSトークンを前置構文解析関数のマップに登録
 	p.registerPrefix(token.MINUS, p.parsePrefixExpression)
+
+	p.infixParseFns = make(map[token.TokenType]infixParseFn)
+	p.registerInfix(token.PLUS, p.parseInfixExpression)
+	p.registerInfix(token.MINUS, p.parseInfixExpression)
+	p.registerInfix(token.SLASH, p.parseInfixExpression)
+	p.registerInfix(token.ASTERISK, p.parseInfixExpression)
+	p.registerInfix(token.EQ, p.parseInfixExpression)
+	p.registerInfix(token.NOT_EQ, p.parseInfixExpression)
+	p.registerInfix(token.LT, p.parseInfixExpression)
+	p.registerInfix(token.GT, p.parseInfixExpression)
 
 	p.nextToken()
 	p.nextToken()
@@ -258,6 +280,20 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 	// 前置構文解析関数を実行
 	leftExp := prefix()
 
+	// 次のトークンがセミコロンでないかつ、引数の優先順位よりも低い場合は繰り返す
+	for !p.peekTokenIs(token.SEMICOLON) && precedence < p.peekPrecedence() {
+
+		infix := p.infixParseFns[p.peekToken.Type]
+
+		if infix == nil {
+			return leftExp
+		}
+
+		p.nextToken()
+
+		leftExp = infix(leftExp)
+	}
+
 	return leftExp
 }
 
@@ -402,6 +438,60 @@ func (p *Parser) parsePrefixExpression() ast.Expression {
 
 	// 式を構文解析
 	expression.Right = p.parseExpression(PREFIX)
+
+	return expression
+}
+
+/**
+ * 名前: Parser.peekPrecedence
+ * 概要: 次のトークンの優先順位を返す
+ * 引数: なし
+ * 戻値: int
+ */
+func (p *Parser) peekPrecedence() int {
+
+	if p, ok := precedences[p.peekToken.Type]; ok {
+		return p
+	}
+
+	// トークンが見つからなかった場合はLOWESTを返す
+	return LOWEST
+}
+
+/**
+ * 名前: Parser.curPrecedence
+ * 概要: 現在のトークンの優先順位を返す
+ * 引数: なし
+ * 戻値: int
+ */
+func (p *Parser) curPrecedence() int {
+
+	if p, ok := precedences[p.curToken.Type]; ok {
+		return p
+	}
+
+	// トークンが見つからなかった場合はLOWESTを返す
+	return LOWEST
+}
+
+/**
+ * 名前: Parser.parseInfixExpression
+ * 概要: 中置演算子を構文解析する
+ * 引数: ast.Expression
+ * 戻値: ast.Expression
+ */
+func (p *Parser) parseInfixExpression(left ast.Expression) ast.Expression {
+
+	expression := &ast.InfixExpression{
+		Token:    p.curToken,
+		Operator: p.curToken.Literal,
+		Left:     left,
+	}
+
+	// 現在のトークンの優先順位を取得
+	precedence := p.curPrecedence()
+	p.nextToken()
+	expression.Right = p.parseExpression(precedence)
 
 	return expression
 }
