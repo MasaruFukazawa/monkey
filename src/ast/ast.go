@@ -240,6 +240,49 @@ func (il *IntegerLiteral) String() string {
 	return il.Token.Literal
 }
 
+// 前置演算子を表すノード
+type PrefixExpression struct {
+	Token    token.Token // 前置演算子トークン、例えば「!」
+	Operator string      // 前置演算子、例えば「-」
+	Right    Expression  // 右側の式
+}
+
+/**
+ * 名前: PrefixExpression.expressionNode
+ * 概要:
+ *	前置演算子のトークンリテラルを返す
+ *	Expressionインターフェースを満たす
+ */
+func (pe *PrefixExpression) expressionNode() {}
+
+/**
+ * 名前: PrefixExpression.TokenLiteral
+ * 概要:
+ *	前置演算子のトークンリテラルを返す
+ *	TokenLiteralインターフェースを満たす
+ */
+func (pe *PrefixExpression) TokenLiteral() string {
+	return pe.Token.Literal
+}
+
+/**
+ * 名前: PrefixExpression.String
+ * 概要:
+ *	前置演算子のトークンリテラルを返す
+ *	Nodeインターフェースを満たす
+ */
+func (pe *PrefixExpression) String() string {
+
+	var out bytes.Buffer
+
+	out.WriteString("(")
+	out.WriteString(pe.Operator)
+	out.WriteString(pe.Right.String())
+	out.WriteString(")")
+
+	return out.String()
+}
+
 // プログラム全体を表すノード
 type Program struct {
 

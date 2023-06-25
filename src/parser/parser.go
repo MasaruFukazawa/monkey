@@ -77,6 +77,12 @@ func New(l *lexer.Lexer) *Parser {
 	// 前置構文解析関数のマップに関数を登録
 	p.registerPrefix(token.INT, p.parseIntegerLiteral)
 
+	// BANGトークンを前置構文解析関数のマップに登録
+	p.registerPrefix(token.BANG, p.parsePrefixExpression)
+
+	// MINUSトークンを前置構文解析関数のマップに登録
+	p.registerPrefix(token.MINUS, p.parsePrefixExpression)
+
 	p.nextToken()
 	p.nextToken()
 
@@ -222,6 +228,17 @@ func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {
 }
 
 /**
+ * 名前: Parse.noPrefixParseFnError
+ * 処理: 構文解析を行う
+ * 引数: token.TokenType
+ * 戻値: なし
+ */
+func (p *Parser) noPrefixParseFnError(t token.TokenType) {
+	msg := fmt.Sprintf("no prefix parse function for %s found", t)
+	p.errors = append(p.errors, msg)
+}
+
+/**
  * 名前: Parser.parseExpression
  * 処続: 構文解析を行う
  * 引数: int
@@ -234,6 +251,7 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 
 	// 前置構文解析関数がnilであればnilを返す
 	if prefix == nil {
+		p.noPrefixParseFnError(p.curToken.Type)
 		return nil
 	}
 
@@ -363,4 +381,27 @@ func (p *Parser) parseIntegerLiteral() ast.Expression {
 	lit.Value = value
 
 	return lit
+}
+
+/**
+ * 名前: Parser.parsePrefixExpression
+ * 概要: 前置演算子を構文解析する
+ * 引数: なし
+ * 戻値: ast.Expression
+ */
+func (p *Parser) parsePrefixExpression() ast.Expression {
+
+	// 前置演算子を持つast.PrefixExpressionポインタを生成
+	expression := &ast.PrefixExpression{
+		Token:    p.curToken,
+		Operator: p.curToken.Literal,
+	}
+
+	// 次のトークンへ進める
+	p.nextToken()
+
+	// 式を構文解析
+	expression.Right = p.parseExpression(PREFIX)
+
+	return expression
 }
