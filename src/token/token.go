@@ -6,7 +6,8 @@
  */
 package token
 
-// トークンの種類を定義する
+// monkeylangで使用できるトークンの種類を定義する
+// .. トークンは、字句解析の結果として得られる
 const (
 	ILLEGAL = "ILLEGAL" // 規則違反
 	EOF     = "EOF"     // ファイルの終端
@@ -55,11 +56,13 @@ type TokenType string
 
 // トークンを表す構造体
 type Token struct {
-	Type    TokenType // トークンタイプ
-	Literal string    // トークン文字列
+	Type    TokenType // トークンの種類
+	Literal string    // トークン文字列（ 変数名 や + , - などの文字列 ）
 }
 
 // 予約語のマップ
+// .. 予約語は、言語の構文構造に使用するキーワード
+// .. 予約語は、変数名や関数名として使用できない
 var keywords = map[string]TokenType{
 	"fn":     FUNCTION,
 	"let":    LET,

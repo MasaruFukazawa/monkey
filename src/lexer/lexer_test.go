@@ -145,16 +145,20 @@ if (5 < 10) {
 		{token.EOF, ""},
 	}
 
+	// 字句解析器を生成
 	l := New(input)
 
 	for i, tt := range tests {
 
+		// 次のトークンを取得
 		_token := l.NextToken()
 
+		// トークンの種類と文字列が期待値と一致するか確認
 		if _token.Type != tt.expectedType {
 			t.Fatalf("tests[%d] - token type wrong. expected=%q, got=%q", i, tt.expectedType, _token.Type)
 		}
 
+		// トークンの文字列が期待値と一致するか確認
 		if _token.Literal != tt.expectedLiteral {
 			t.Fatalf("tests[%d] - literal wrong. expected=%q, got=%q", i, tt.expectedLiteral, _token.Literal)
 		}

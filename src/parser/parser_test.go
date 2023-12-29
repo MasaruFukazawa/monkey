@@ -388,6 +388,7 @@ func TestOperatorPrecedenceParsing(t *testing.T) {
  * .. il ast.Expression: 式
  * .. value int64: 整数値
  * 戻り値:
+ * .. bool
  */
 func testIntegerLiteral(t *testing.T, il ast.Expression, value int64) bool {
 
@@ -412,12 +413,13 @@ func testIntegerLiteral(t *testing.T, il ast.Expression, value int64) bool {
 }
 
 /*
-- 名前: checkParserErrors
-- 処理: パーサーのエラーをチェックする
-- 引数:
-- .. t *testing.T: テスト
-- .. p *Parser: パーサー
-- 戻り値:
+ * 名前: checkParserErrors
+ * 処理: パーサーのエラーをチェックする
+ * 引数:
+ * .. t *testing.T: テスト
+ * .. p *Parser: パーサー
+ * 戻り値:
+ * .. なし
 */
 func checkParserErrors(t *testing.T, p *Parser) {
 

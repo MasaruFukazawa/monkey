@@ -63,52 +63,11 @@ type Parser struct {
 	curToken  token.Token
 	peekToken token.Token
 
+	// 前置構文解析関数のマップ
 	prefixParseFns map[token.TokenType]prefixParseFn
+
+	// 中置構文解析関数のマップ
 	infixParseFns  map[token.TokenType]infixParseFn
-}
-
-/**
- * 名前: New
- * 処理: 構文解析器のポインタを返す
- * 引数: *lexer.Lexer
- * 戻値: *Parser
- */
-func New(l *lexer.Lexer) *Parser {
-
-	p := &Parser{
-		l:      l,
-		errors: []string{},
-	}
-
-	// 前置構文解析関数のマップを初期化
-	p.prefixParseFns = make(map[token.TokenType]prefixParseFn)
-
-	// 前置構文解析関数のマップに関数を登録
-	p.registerPrefix(token.IDENT, p.parseIdentifier)
-
-	// 前置構文解析関数のマップに関数を登録
-	p.registerPrefix(token.INT, p.parseIntegerLiteral)
-
-	// BANGトークンを前置構文解析関数のマップに登録
-	p.registerPrefix(token.BANG, p.parsePrefixExpression)
-
-	// MINUSトークンを前置構文解析関数のマップに登録
-	p.registerPrefix(token.MINUS, p.parsePrefixExpression)
-
-	p.infixParseFns = make(map[token.TokenType]infixParseFn)
-	p.registerInfix(token.PLUS, p.parseInfixExpression)
-	p.registerInfix(token.MINUS, p.parseInfixExpression)
-	p.registerInfix(token.SLASH, p.parseInfixExpression)
-	p.registerInfix(token.ASTERISK, p.parseInfixExpression)
-	p.registerInfix(token.EQ, p.parseInfixExpression)
-	p.registerInfix(token.NOT_EQ, p.parseInfixExpression)
-	p.registerInfix(token.LT, p.parseInfixExpression)
-	p.registerInfix(token.GT, p.parseInfixExpression)
-
-	p.nextToken()
-	p.nextToken()
-
-	return p
 }
 
 /**
@@ -494,4 +453,50 @@ func (p *Parser) parseInfixExpression(left ast.Expression) ast.Expression {
 	expression.Right = p.parseExpression(precedence)
 
 	return expression
+}
+
+/**
+ * 名前: New
+ * 処理: 構文解析器のポインタを返す
+ * 引数: *lexer.Lexer
+ * 戻値: *Parser
+ */
+ func New(l *lexer.Lexer) *Parser {
+
+	p := &Parser{
+		l:      l,
+		errors: []string{},
+	}
+
+	// 前置構文解析関数のマップを初期化
+	p.prefixParseFns = make(map[token.TokenType]prefixParseFn)
+
+	// 前置構文解析関数のマップに関数を登録
+	p.registerPrefix(token.IDENT, p.parseIdentifier)
+
+	// 前置構文解析関数のマップに関数を登録
+	p.registerPrefix(token.INT, p.parseIntegerLiteral)
+
+	// BANGトークンを前置構文解析関数のマップに登録
+	p.registerPrefix(token.BANG, p.parsePrefixExpression)
+
+	// MINUSトークンを前置構文解析関数のマップに登録
+	p.registerPrefix(token.MINUS, p.parsePrefixExpression)
+
+	// 中間構文解析関数のマップを初期化
+	p.infixParseFns = make(map[token.TokenType]infixParseFn)
+
+	p.registerInfix(token.PLUS, p.parseInfixExpression)
+	p.registerInfix(token.MINUS, p.parseInfixExpression)
+	p.registerInfix(token.SLASH, p.parseInfixExpression)
+	p.registerInfix(token.ASTERISK, p.parseInfixExpression)
+	p.registerInfix(token.EQ, p.parseInfixExpression)
+	p.registerInfix(token.NOT_EQ, p.parseInfixExpression)
+	p.registerInfix(token.LT, p.parseInfixExpression)
+	p.registerInfix(token.GT, p.parseInfixExpression)
+
+	p.nextToken()
+	p.nextToken()
+
+	return p
 }

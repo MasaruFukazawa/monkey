@@ -21,23 +21,26 @@ type Node interface {
 	String() string
 }
 
-// 抽象構文木の文のインターフェース
+// 抽象構文木の「文」のインターフェース
 type Statement interface {
 	// Nodeを継承する構造体は、TokenLiteral()メソッドを実装しなければならない
 	Node
+
 	// Statementを継承する構造体は、statementNode()メソッドを実装しなければならない
 	statementNode()
 }
 
-// 抽象構文木の式のインターフェース
+// 抽象構文木の「式」のインターフェース
 type Expression interface {
 	// Nodeを継承する構造体は、TokenLiteral()メソッドを実装しなければならない
 	Node
+
 	// Expressionを継承する構造以件のexpressionNode()メタッドを実装してない
 	expressionNode()
 }
 
 // LET文を表すノード
+// .. Statementインターフェースを満たす
 type LetStatement struct {
 	Token token.Token // token.LET トークン
 	Name  *Identifier // 変数名
@@ -56,7 +59,8 @@ func (ls *LetStatement) statementNode() {}
  * 名前: LetStatement.TokenLiteral
  * 概要:
  *	LET文のトークンリテラルを返す
- *  TokenLiteralインターフェースを満たす
+ *  Statementインターフェースを満たす
+ *  .. Nodeインターフェースを満たす
  */
 func (ls *LetStatement) TokenLiteral() string {
 	return ls.Token.Literal
@@ -66,7 +70,8 @@ func (ls *LetStatement) TokenLiteral() string {
  * 名前: LetStatement.String
  * 概要:
  *	LET文のトークンリテラルを返す
- *  Nodeインターフェースを満たす
+ *  Statementインターフェースを満たす
+ *  .. Nodeインターフェースを満たす
  */
 func (ls *LetStatement) String() string {
 
@@ -100,12 +105,6 @@ type ReturnStatement struct {
  */
 func (rs *ReturnStatement) statementNode() {}
 
-// 識別子(変数名・関数名)を表すノード
-type Identifier struct {
-	Token token.Token // token.IDENT トークン
-	Value string      // 変数名
-}
-
 /**
  * 名前: ReturnStatement.TokenLiteral
  * 概要:
@@ -138,7 +137,11 @@ func (rs *ReturnStatement) String() string {
 	return out.String()
 }
 
-// 式のノード
+/**
+ * 名前: ExpressionStatement
+ * 概要:
+ *	式のノード
+ */
 type ExpressionStatement struct {
 	Token      token.Token // 式の最初のトークン
 	Expression Expression  // 式を保持するフィールド
@@ -176,6 +179,12 @@ func (es *ExpressionStatement) String() string {
 	}
 
 	return ""
+}
+
+// 識別子(変数名・関数名)を表すノード
+type Identifier struct {
+	Token token.Token // token.IDENT トークン
+	Value string      // 変数名
 }
 
 /**
@@ -283,7 +292,7 @@ func (pe *PrefixExpression) String() string {
 	return out.String()
 }
 
-// z中置演算子を表すノード
+// 中置演算子を表すノード
 type InfixExpression struct {
 	Token    token.Token // 演算子トークン、例えば「+」
 	Left     Expression  // 左側の式
@@ -329,6 +338,7 @@ func (oe *InfixExpression) String() string {
 }
 
 // プログラム全体を表すノード
+// .. Nodeインターフェースを満たす
 type Program struct {
 
 	// プログラム全体の文の配列
@@ -337,7 +347,7 @@ type Program struct {
 
 /**
  * 名前: TokenLiteral
- * 概要:
+ * 概要: プログラム全体の文の配列の先頭のトークンリテラルを返す
  */
 func (p *Program) TokenLiteral() string {
 

@@ -10,38 +10,12 @@ import (
 	"github.com/MasaruFukazawa/monkey-lang/src/token"
 )
 
+// 字句解析器を表す構造体
 type Lexer struct {
-	input        string
-	position     int  // 入力における現在の位置 : 現在の文字を指し示す
-	readPosition int  // これから読み込む位置 : 現在の文字の次を指し示す
-	ch           byte // 現在検査中の文字
-}
-
-/**
- * 名前: New
- * 処理: Lexer構造体のポインタを返す
- * 引数: input : ソースコード文字列
- * 戻値: *Lexer
- */
-func New(input string) *Lexer {
-
-	// lexer構造体のポインタを返す
-	l := &Lexer{input: input}
-
-	// 1文字読み込む
-	l.readChar()
-
-	return l
-}
-
-/**
- * 名前: newToken
- * 処理: トークン構造体を生成する
- * 引数: トークンの種類, トークンの文字
- * 戻値: トークン構造体
- */
-func newToken(tokenType token.TokenType, ch byte) token.Token {
-	return token.Token{Type: tokenType, Literal: string(ch)}
+	input        string // ソースコード文字列
+	position     int    // 入力における現在の位置 : 現在の文字を指し示す。 初期値は0
+	readPosition int    // これから読み込む位置 : 現在の文字の次を指し示す。初期値は0
+	ch           byte   // 現在検査中の1文字
 }
 
 /**
@@ -60,7 +34,7 @@ func (l *Lexer) readChar() {
 		l.ch = l.input[l.readPosition]
 	}
 
-	// positionとreadPositionを1つ進める
+	// position（現在の読み込み位置）とreadPosition（次に読み込む位置）を1つ進める
 	l.position = l.readPosition
 	l.readPosition += 1
 }
@@ -83,12 +57,12 @@ func (l *Lexer) NextToken() token.Token {
 	switch l.ch {
 	case '=':
 		// 1文字前を覗き見する
-		if l.peekChar() == '=' {
+		if l.peekChar() == '=' { // == であれば、EQトークンとする
 			ch := l.ch
 			l.readChar()
 			literal := string(ch) + string(l.ch)
 			tok = token.Token{Type: token.EQ, Literal: literal}
-		} else {
+		} else { // = であれば、ASSIGNトークンとする
 			tok = newToken(token.ASSIGN, l.ch)
 		}
 	case '+':
@@ -125,7 +99,7 @@ func (l *Lexer) NextToken() token.Token {
 		tok = newToken(token.LBRACE, l.ch)
 	case '}':
 		tok = newToken(token.RBRACE, l.ch)
-	case 0:
+	case 0: // ソースコードの終端に達した場合
 		tok.Literal = ""
 		tok.Type = token.EOF
 
@@ -143,7 +117,7 @@ func (l *Lexer) NextToken() token.Token {
 
 			return tok
 
-			// 文字が数字である限り、整数として読み込む
+		// 文字が数字である限り、整数として読み込む
 		} else if isDigit(l.ch) {
 
 			// 整数を取得する
@@ -152,7 +126,7 @@ func (l *Lexer) NextToken() token.Token {
 
 			return tok
 
-			// 英字でない場合、規則違反とする
+		// 英字のみでもないし、数字のみでもない場合、ILLEGALトークンとする
 		} else {
 			tok = newToken(token.ILLEGAL, l.ch)
 		}
@@ -179,12 +153,16 @@ func (l *Lexer) readIdentifier() string {
 	// 英字である限り、1文字ずつ読み込む
 	// .. l.positionを1つ進める
 	// .. l.readPositionを1つ進める
+	// .. 英字である限り、1文字ずつ読み込む
+	// .. なので、識別子(変数名・関数名)の終了位置は、l.positionの1つ前になる
+	// .. l.positionは、Letterでない文字を指し示す
 	for isLetter(l.ch) {
 		l.readChar()
 	}
 
 	// 識別子(変数名・関数名)を返す
 	// .. 英字のみの文字列を返す
+	// .. positionからl.positionまでの文字列を返す
 	return l.input[position:l.position]
 }
 
@@ -219,12 +197,16 @@ func (l *Lexer) readNumber() string {
 	// 数字である限り、1文字ずつ読み込む
 	// .. l.positionを1つ進める
 	// .. l.readPositionを1つ進める
+	// .. 数字である限り、1文字ずつ読み込む
+	// .. なので、整数の終了位置は、l.positionの1つ前になる
+	// .. l.positionは、数字でない文字を指し示す
 	for isDigit(l.ch) {
 		l.readChar()
 	}
 
 	// 整数を返す
 	// .. 数字のみの文字列を返す
+	// .. positionからl.positionまでの文字列を返す
 	return l.input[position:l.position]
 }
 
@@ -242,6 +224,36 @@ func (l *Lexer) peekChar() byte {
 		return l.input[l.readPosition]
 	}
 
+}
+
+/**
+ * 名前: lexer.New
+ * 処理: Lexer構造体のポインタを返す
+ * 引数: input : ソースコード文字列
+ * 戻値: *Lexer
+ */
+ func New(input string) *Lexer {
+
+	// lexer構造体のポインタを返す
+	l := &Lexer{input: input}
+
+	// 1文字読み込む
+	// .. l.ch = l.input[0]
+	// .. l.position = 0
+	// .. l.readPosition = 1
+	l.readChar()
+
+	return l
+}
+
+/**
+ * 名前: newToken
+ * 処理: トークンごとにトークン構造体を生成する
+ * 引数: トークンの種類, トークンの文字
+ * 戻値: トークン構造体
+ */
+func newToken(tokenType token.TokenType, ch byte) token.Token {
+	return token.Token{Type: tokenType, Literal: string(ch)}
 }
 
 /**
