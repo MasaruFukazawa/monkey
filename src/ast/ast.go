@@ -337,6 +337,42 @@ func (oe *InfixExpression) String() string {
 	return out.String()
 }
 
+
+// 真偽値を表すノード
+type Boolean struct {
+	Token token.Token
+	Value bool
+}
+
+/**
+ * 名前: Boolean.expressionNode
+ * 概要:
+ *	真偽値のトークンリテラルを返す
+ *	Expressionインターフェースを満たす
+ */
+func (b *Boolean) expressionNode() {}
+
+/**
+ * 名前: Boolean.TokenLiteral
+ * 概要:
+ *	真偽値のトークンリテラルを返す
+ *	TokenLiteralインターフェースを満たす
+ */
+func (b *Boolean) TokenLiteral() string {
+	return b.Token.Literal
+}
+
+/**
+ * 名前: Boolean.String
+ * 概要:
+ *	真偽値のトークンリテラルを返す
+ *	Nodeインターフェースを満たす
+ */
+func (b *Boolean) String() string {
+	return b.Token.Literal
+}
+
+
 // プログラム全体を表すノード
 // .. Nodeインターフェースを満たす
 type Program struct {

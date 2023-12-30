@@ -456,6 +456,16 @@ func (p *Parser) parseInfixExpression(left ast.Expression) ast.Expression {
 }
 
 /**
+ * 名前: Parser.parseBoolean
+ * 概要: 真偽値を構文解析する
+ * 引数: なし
+ * 戻値: ast.Expression
+ */
+func (p *Parser) parseBoolean() ast.Expression {
+	return &ast.Boolean{Token: p.curToken, Value: p.curTokenIs(token.TRUE)}
+}
+
+/**
  * 名前: New
  * 処理: 構文解析器のポインタを返す
  * 引数: *lexer.Lexer
@@ -482,6 +492,10 @@ func (p *Parser) parseInfixExpression(left ast.Expression) ast.Expression {
 
 	// MINUSトークンを前置構文解析関数のマップに登録
 	p.registerPrefix(token.MINUS, p.parsePrefixExpression)
+
+	// 真偽値を前置構文解析関数のマップに登録
+	p.registerPrefix(token.TRUE, p.parseBoolean)
+	p.registerPrefix(token.FALSE, p.parseBoolean)
 
 	// 中間構文解析関数のマップを初期化
 	p.infixParseFns = make(map[token.TokenType]infixParseFn)
