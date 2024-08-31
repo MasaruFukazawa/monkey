@@ -376,6 +376,60 @@ func (b *Boolean) String() string {
 }
 
 
+/**
+ *
+ * if文を表すノード
+ *
+ */
+type IfExpression struct {
+	Token       token.Token // 'if' トークン
+	Condition   Expression  // 条件式
+	Consequence *BlockStatement // 条件が真の場合の文
+	Alternative *BlockStatement // 条件が偽の場合の文
+}
+
+/**
+ * 名前: IfExpression.expressionNode
+ * 概要:
+ *	if文のトークンリテラルを返す
+ *	Expressionインターフェースを満たす
+ */	
+func (ie *IfExpression) expressionNode() {}
+
+/**
+ * 名前: IfExpression.TokenLiteral
+ * 概要:
+ *	if文のトークンリテラルを返す
+ *	TokenLiteralインターフェースを満たす
+ */
+func (ie *IfExpression) TokenLiteral() string {
+	return ie.Token.Literal
+}
+
+/**
+ * 名前: IfExpression.String
+ * 概要:
+ *	if文のトークンリテラルを返す
+ *	Nodeインターフェースを満たす
+ */
+func (ie *IfExpression) String() string {
+
+	var out bytes.Buffer
+
+	out.WriteString("if")
+	out.WriteString(ie.Condition.String())
+	out.WriteString(" ")
+	out.WriteString(ie.Consequence.String())
+
+	if ie.Alternative != nil {
+		out.WriteString("else ")
+		out.WriteString(ie.Alternative.String())
+	}
+
+	return out.String
+}
+
+
 // プログラム全体を表すノード
 // .. Nodeインターフェースを満たす
 type Program struct {
