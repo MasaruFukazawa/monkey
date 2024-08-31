@@ -3,5 +3,5 @@ services:
   monkey-lang:
     build: .
     volumes:
-      - .:/go/src
+      - .:/go/monkey-lang
     tty: true
