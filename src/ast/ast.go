@@ -337,8 +337,11 @@ func (oe *InfixExpression) String() string {
 	return out.String()
 }
 
-
-// 真偽値を表すノード
+/**
+ *
+ * 真偽値を表すノード
+ *
+ */
 type Boolean struct {
 	Token token.Token
 	Value bool

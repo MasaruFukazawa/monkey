@@ -134,12 +134,13 @@ return 993322;
 
 /**
  * 名前: TestIdentifierExpression
- * 概要: 識別子式のテストを実装する
+ * 概要: 識別子のテスト
  * 引数: t *testing.T
  * 戻り値:
  */
 func TestIdentifierExpression(t *testing.T) {
 
+	// 識別子例のテストコード
 	input := "foobar;"
 
 	l := lexer.New(input)
@@ -155,7 +156,7 @@ func TestIdentifierExpression(t *testing.T) {
 		t.Fatalf("program has not enough statements. got=%d", len(program.Statements))
 	}
 
-	// program.Statements[0]がast.ExpressionStatementであることを確認
+	// 識別子は式であるため、program.Statements[0]がast.ExpressionStatementであることを確認
 	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
 
 	if !ok {
@@ -318,26 +319,6 @@ func TestParsingInfixExpressions(t *testing.T) {
 		if !ok {
 			t.Fatalf("program.Statements[0] is not ast.ExpressionStatement. got=%T", program.Statements[0])
 		}
-
-		/*
-		exp, ok := stmt.Expression.(*ast.InfixExpression)
-
-		if !ok {
-			t.Fatalf("exp is not ast.InfixExpression. got=%T", stmt.Expression)
-		}
-
-		if !testIntegerLiteral(t, exp.Left, tt.leftValue) {
-			return
-		}
-
-		if exp.Operator != tt.operator {
-			t.Fatalf("exp.Operator is not '%s'. got=%s", tt.operator, exp.Operator)
-		}
-
-		if !testIntegerLiteral(t, exp.Right, tt.rightValue) {
-			return
-		}
-		*/
 
 		if !testInfixExpression(t, stmt.Expression, tt.leftValue, tt.operator, tt.rightValue) {
 			return 
