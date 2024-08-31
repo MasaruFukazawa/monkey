@@ -67,7 +67,7 @@ type Parser struct {
 	prefixParseFns map[token.TokenType]prefixParseFn
 
 	// 中置構文解析関数のマップ
-	infixParseFns  map[token.TokenType]infixParseFn
+	infixParseFns map[token.TokenType]infixParseFn
 }
 
 /**
@@ -465,10 +465,9 @@ func (p *Parser) parseBoolean() ast.Expression {
 	return &ast.Boolean{Token: p.curToken, Value: p.curTokenIs(token.TRUE)}
 }
 
-
 /**
  * 名前: Parser.parseGroupedExpression
- * 概要: 
+ * 概要:
  * 引数: なし
  * 戻値: ast.Expression
  */
@@ -486,12 +485,93 @@ func (p *Parser) parseGroupedExpression() ast.Expression {
 }
 
 /**
+ * 名前: Parser.parseIfExpression
+ * 概要: if文を構文解析する
+ * 引数: なし
+ * 戻値: ast.Expression
+ */
+func (p *Parser) parseIfExpression() ast.Expression {
+
+	expression := &ast.IfExpression{Token: p.curToken}
+
+	// 次のトークンへ進める
+	if !p.expectPeek(token.LPAREN) {
+		return nil
+	}
+
+	// 条件式を構文解析
+	p.nextToken()
+
+	expression.Condition = p.parseExpression(LOWEST)
+
+	if !p.expectPeek(token.RPAREN) {
+		return nil
+	}
+
+	if !p.expectPeek(token.LBRACE) {
+		return nil
+	}
+
+	// Consequenceを構文解析
+	expression.Consequence = p.parseBlockStatement()
+
+	// 次のトークンがELSEであれば、ELSEブロックを構文解析
+	if p.peekTokenIs(token.ELSE) {
+
+		p.nextToken()
+
+		if !p.expectPeek(token.LBRACE) {
+			return nil
+		}
+
+		// Alternativeを構文解析
+		expression.Alternative = p.parseBlockStatement()
+	}
+
+	return expression
+}
+
+/**
+ * 名前: Parser.parseBlockStatement
+ * 概要: ブロック文を構文解析する
+ * 引数: なし
+ * 戻値: *ast.BlockStatement
+ */
+func (p *Parser) parseBlockStatement() *ast.BlockStatement {
+
+	block := &ast.BlockStatement{Token: p.curToken}
+
+	// Statementsにast.Statementを追加していく
+	block.Statements = []ast.Statement{}
+
+	// 次のトークンへ進める
+	p.nextToken()
+
+	// 次のトークンがRBRACEでない場合は繰り返す
+	for !p.curTokenIs(token.RBRACE) && !p.curTokenIs(token.EOF) {
+
+		// Statementを構文解析
+		stmt := p.parseStatement()
+
+		// stmtがnilでなければ、block.Statementsに追加
+		if stmt != nil {
+			block.Statements = append(block.Statements, stmt)
+		}
+
+		// 次のトークンへ進める
+		p.nextToken()
+	}
+
+	return block
+}
+
+/**
  * 名前: New
  * 処理: 構文解析器のポインタを返す
  * 引数: *lexer.Lexer
  * 戻値: *Parser
  */
- func New(l *lexer.Lexer) *Parser {
+func New(l *lexer.Lexer) *Parser {
 
 	p := &Parser{
 		l:      l,
@@ -519,6 +599,9 @@ func (p *Parser) parseGroupedExpression() ast.Expression {
 
 	// LPARENトークンを前置構文解析関数のマップに登録
 	p.registerPrefix(token.LPAREN, p.parseGroupedExpression)
+
+	// if文の構文解析
+	p.registerPrefix(token.IF, p.parseIfExpression)
 
 	// 中間構文解析関数のマップを初期化
 	p.infixParseFns = make(map[token.TokenType]infixParseFn)

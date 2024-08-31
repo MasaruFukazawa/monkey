@@ -228,9 +228,9 @@ func TestIntegerLiteralExpression(t *testing.T) {
 func TestParsingPrefixExpressions(t *testing.T) {
 
 	prefixTests := []struct {
-		input       string
-		operator	string
-		value		interface{}
+		input    string
+		operator string
+		value    interface{}
 	}{
 		{"!5;", "!", 5},
 		{"-15;", "-", 15},
@@ -321,7 +321,7 @@ func TestParsingInfixExpressions(t *testing.T) {
 		}
 
 		if !testInfixExpression(t, stmt.Expression, tt.leftValue, tt.operator, tt.rightValue) {
-			return 
+			return
 		}
 	}
 }
@@ -381,6 +381,130 @@ func TestOperatorPrecedenceParsing(t *testing.T) {
 
 }
 
+/**
+ * 名前: TestIFExpression
+ * 概要: if式のテストを実装する
+ * 引数: t *testing.T
+ * 戻り値:
+ */
+func TestIFExpression(t *testing.T) {
+
+	input := "if (x < y) { x }"
+
+	l := lexer.New(input)
+
+	p := New(l)
+
+	program := p.ParseProgram()
+
+	checkParserErrors(t, p)
+
+	if len(program.Statements) != 1 {
+		t.Fatalf("program.Statements does not contain %d statements. got=%d", 1, len(program.Statements))
+	}
+
+	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+
+	if !ok {
+		t.Fatalf("program.Statements[0] is not ast.ExpressionStatement. got=%T", program.Statements[0])
+	}
+
+	exp, ok := stmt.Expression.(*ast.IfExpression)
+
+	if !ok {
+		t.Fatalf("program.Expression is not ast.IfExpression. got=%T", stmt.Expression)
+	}
+
+	if !testInfixExpression(t, exp.Condition, "x", "<", "y") {
+		return
+	}
+
+	if len(exp.Consequence.Statements) != 1 {
+		t.Errorf("consequence is not 1 statements. got=%d¥n", len(exp.Consequence.Statements))
+	}
+
+	consequence, ok := exp.Consequence.Statements[0].(*ast.ExpressionStatement)
+
+	if !ok {
+		t.Fatalf("Statements[0] is not ast.ExpressionStatement. got=%T", exp.Consequence.Statements[0])
+	}
+
+	if !testIdentifier(t, consequence.Expression, "x") {
+		return
+	}
+
+	if exp.Alternative != nil {
+		t.Errorf("exp.Alternative.Statements was not nil. got=%+v", exp.Alternative.Statements)
+	}
+}
+
+/**
+ * 名前: TestIfElseExpression
+ * 概要: if-else式のテストを実装する
+ * 引数: t *testing.T
+ * 戻り値:
+ */
+/*
+func TestIfElseExpression(t *testing.T) {
+	input := `if (x < y) { x } else { y }`
+
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	if len(program.Statements) != 1 {
+		t.Fatalf("program.Body does not contain %d statements. got=%d\n",
+			1, len(program.Statements))
+	}
+
+	stmt, ok := program.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("program.Statements[0] is not ast.ExpressionStatement. got=%T",
+			program.Statements[0])
+	}
+
+	exp, ok := stmt.Expression.(*ast.IfExpression)
+	if !ok {
+		t.Fatalf("stmt.Expression is not ast.IfExpression. got=%T", stmt.Expression)
+	}
+
+	if !testInfixExpression(t, exp.Condition, "x", "<", "y") {
+		return
+	}
+
+	if len(exp.Consequence.Statements) != 1 {
+		t.Errorf("consequence is not 1 statements. got=%d\n",
+			len(exp.Consequence.Statements))
+	}
+
+	consequence, ok := exp.Consequence.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("Statements[0] is not ast.ExpressionStatement. got=%T",
+			exp.Consequence.Statements[0])
+	}
+
+	if !testIdentifier(t, consequence.Expression, "x") {
+		return
+	}
+
+	if len(exp.Alternative.Statements) != 1 {
+		t.Errorf("exp.Alternative.Statements does not contain 1 statements. got=%d\n",
+			len(exp.Alternative.Statements))
+	}
+
+	alternative, ok := exp.Alternative.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("Statements[0] is not ast.ExpressionStatement. got=%T",
+			exp.Alternative.Statements[0])
+	}
+
+	if !testIdentifier(t, alternative.Expression, "y") {
+		return
+	}
+}
+*/
+
 /*
  * 名前: testIntegerLiteral
  * 概要: 整数リテラルのテストを実装する
@@ -421,7 +545,7 @@ func testIntegerLiteral(t *testing.T, il ast.Expression, value int64) bool {
  * .. p *Parser: パーサー
  * 戻り値:
  * .. なし
-*/
+ */
 func checkParserErrors(t *testing.T, p *Parser) {
 
 	errors := p.Errors()
@@ -439,19 +563,18 @@ func checkParserErrors(t *testing.T, p *Parser) {
 	t.FailNow()
 }
 
-
 /*
  * 名前: testIdentifier
  * 処理: リテラルのテストを実装する
- * 引数: 
+ * 引数:
  * .. t *testing.T
  * .. exp ast.Expression
  * .. value string
  * 戻り値:
  * .. bool
- */ 
+ */
 func testIdentifier(t *testing.T, exp ast.Expression, value string) bool {
-	
+
 	ident, ok := exp.(*ast.Identifier)
 
 	if !ok {
@@ -548,25 +671,25 @@ func testInfixExpression(t *testing.T, exp ast.Expression, left interface{}, ope
  * .. value bool: 真偽値
  * 戻り値:
  */
- func testBooleanLiteral(t *testing.T, exp ast.Expression, value bool) bool {
+func testBooleanLiteral(t *testing.T, exp ast.Expression, value bool) bool {
 
 	bo, ok := exp.(*ast.Boolean)
 
 	if !ok {
-        t.Errorf("exp not *ast.Boolean. got=%T", exp)
-        return false
-    }
+		t.Errorf("exp not *ast.Boolean. got=%T", exp)
+		return false
+	}
 
-    if bo.Value != value {
-        t.Errorf("bo.Value not %t. got=%t", value, bo.Value)
-        return false
-    }
+	if bo.Value != value {
+		t.Errorf("bo.Value not %t. got=%t", value, bo.Value)
+		return false
+	}
 
-    if bo.TokenLiteral() != fmt.Sprintf("%t", value) {
-        t.Errorf("bo.TokenLiteral not %t. got=%s",
-            value, bo.TokenLiteral())
-        return false
-    }
+	if bo.TokenLiteral() != fmt.Sprintf("%t", value) {
+		t.Errorf("bo.TokenLiteral not %t. got=%s",
+			value, bo.TokenLiteral())
+		return false
+	}
 
-    return true
+	return true
 }

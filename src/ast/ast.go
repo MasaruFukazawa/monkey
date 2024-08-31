@@ -375,15 +375,14 @@ func (b *Boolean) String() string {
 	return b.Token.Literal
 }
 
-
 /**
  *
  * if文を表すノード
  *
  */
 type IfExpression struct {
-	Token       token.Token // 'if' トークン
-	Condition   Expression  // 条件式
+	Token       token.Token     // 'if' トークン
+	Condition   Expression      // 条件式
 	Consequence *BlockStatement // 条件が真の場合の文
 	Alternative *BlockStatement // 条件が偽の場合の文
 }
@@ -393,7 +392,7 @@ type IfExpression struct {
  * 概要:
  *	if文のトークンリテラルを返す
  *	Expressionインターフェースを満たす
- */	
+ */
 func (ie *IfExpression) expressionNode() {}
 
 /**
@@ -426,9 +425,54 @@ func (ie *IfExpression) String() string {
 		out.WriteString(ie.Alternative.String())
 	}
 
-	return out.String
+	return out.String()
 }
 
+/**
+ * 名前: BlockStatement
+ * 概要:
+ *	ブロック文を表すノード
+ *	Statementインターフェースを満たす
+ */
+type BlockStatement struct {
+	Token      token.Token // '{' トークン
+	Statements []Statement // ブロック文の中の文
+}
+
+/**
+ * 名前: BlockStatement.statementNode
+ * 概要:
+ *	BlockStatementのトークンリテラルを返す
+ *	Statementインターフェースを満たす
+ */
+func (bs *BlockStatement) statementNode() {}
+
+/**
+ * 名前: BlockStatement.TokenLiteral
+ * 概要:
+ *	BlockStatementのトークンリテラルを返す
+ *	TokenLiteralインターフェースを満たす
+ */
+func (bs *BlockStatement) TokenLiteral() string {
+	return bs.Token.Literal
+}
+
+/**
+ * 名前: BlockStatement.String
+ * 概要:
+ *	BlockStatementのトークンリテラルを返す
+ *	Nodeインターフェースを満たす
+ */
+func (bs *BlockStatement) String() string {
+
+	var out bytes.Buffer
+
+	for _, s := range bs.Statements {
+		out.WriteString(s.String())
+	}
+
+	return out.String()
+}
 
 // プログラム全体を表すノード
 // .. Nodeインターフェースを満たす
