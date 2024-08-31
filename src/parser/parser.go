@@ -465,6 +465,26 @@ func (p *Parser) parseBoolean() ast.Expression {
 	return &ast.Boolean{Token: p.curToken, Value: p.curTokenIs(token.TRUE)}
 }
 
+
+/**
+ * 名前: Parser.parseGroupedExpression
+ * 概要: 
+ * 引数: なし
+ * 戻値: ast.Expression
+ */
+func (p *Parser) parseGroupedExpression() ast.Expression {
+
+	p.nextToken()
+
+	exp := p.parseExpression(LOWEST)
+
+	if !p.expectPeek(token.RPAREN) {
+		return nil
+	}
+
+	return exp
+}
+
 /**
  * 名前: New
  * 処理: 構文解析器のポインタを返す
@@ -496,6 +516,9 @@ func (p *Parser) parseBoolean() ast.Expression {
 	// 真偽値を前置構文解析関数のマップに登録
 	p.registerPrefix(token.TRUE, p.parseBoolean)
 	p.registerPrefix(token.FALSE, p.parseBoolean)
+
+	// LPARENトークンを前置構文解析関数のマップに登録
+	p.registerPrefix(token.LPAREN, p.parseGroupedExpression)
 
 	// 中間構文解析関数のマップを初期化
 	p.infixParseFns = make(map[token.TokenType]infixParseFn)
