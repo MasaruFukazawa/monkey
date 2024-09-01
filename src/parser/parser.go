@@ -566,6 +566,76 @@ func (p *Parser) parseBlockStatement() *ast.BlockStatement {
 }
 
 /**
+ * 名前: Parser.parseFunctionLiteral
+ * 概要: 関数リテラルを構文解析する
+ * 引数: なし
+ * 戻値: *ast.Expression
+ */
+func (p *Parser) parseFunctionLiteral() ast.Expression {
+
+	// 関数リテラルを持つast.FunctionLiteralポインタを生成
+	lit := &ast.FunctionLiteral{Token: p.curToken}
+
+	// 次のトークンがLPARENでなければnilを返す
+	if !p.expectPeek(token.LPAREN) {
+		return nil
+	}
+
+	// 関数のパラメータを構文解析
+	lit.Parameters = p.parseFunctionParameters()
+
+	// 次のトークンがLBRACEでなければnilを返す
+	if !p.expectPeek(token.LBRACE) {
+		return nil
+	}
+
+	// 関数の本体を構文解析
+	lit.Body = p.parseBlockStatement()
+
+	return lit
+}
+
+/**
+ * 名前: Parser.parseFunctionParameters
+ * 概要: 関数のパラメータを構文解析する
+ * 引数: なし
+ * 戻値: *ast.Identifier
+ */
+func (p *Parser) parseFunctionParameters() []*ast.Identifier {
+
+	// パラメータリスト
+	identifiers := []*ast.Identifier{}
+
+	// 次のトークンがRPARENであれば、nilを返す
+	if p.peekTokenIs(token.RPAREN) {
+		p.nextToken()
+		return identifiers
+	}
+
+	// 次のトークンへ進める
+	p.nextToken()
+
+	// IDENTを持つast.Identifierを生成
+	ident := &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+	identifiers = append(identifiers, ident)
+
+	// 次のトークンがCOMMAであれば、繰り返す
+	for p.peekTokenIs(token.COMMA) {
+		p.nextToken()
+		p.nextToken()
+		ident := &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+		identifiers = append(identifiers, ident)
+	}
+
+	// 次のトークンがRPARENでなければnilを返す
+	if !p.expectPeek(token.RPAREN) {
+		return nil
+	}
+
+	return identifiers
+}
+
+/**
  * 名前: New
  * 処理: 構文解析器のポインタを返す
  * 引数: *lexer.Lexer
@@ -602,6 +672,9 @@ func New(l *lexer.Lexer) *Parser {
 
 	// if文の構文解析
 	p.registerPrefix(token.IF, p.parseIfExpression)
+
+	// fn (関数リテラル)の構文解析
+	p.registerPrefix(token.FUNCTION, p.parseFunctionLiteral)
 
 	// 中間構文解析関数のマップを初期化
 	p.infixParseFns = make(map[token.TokenType]infixParseFn)
