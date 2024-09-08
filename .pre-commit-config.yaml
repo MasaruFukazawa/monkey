@@ -1,0 +1,23 @@
+repos:
+  - repo: local
+    hooks:
+      - id: go-fmt
+        name: Run go fmt in Docker
+        entry: bash -c 'docker run --rm -v $(pwd):/go/monkey-lang -w /go/monkey-lang/src monkey-lang-monkey-lang go fmt ./...'
+        language: system
+        pass_filenames: false
+        files: ^src/
+
+      - id: go-vet
+        name: Run go vet in Docker
+        entry: bash -c 'docker run --rm -v $(pwd):/go/monkey-lang -w /go/monkey-lang/src monkey-lang-monkey-lang go vet ./...'
+        language: system
+        pass_filenames: false
+        files: ^src/
+
+      - id: go-test
+        name: Run go test in Docker
+        entry: bash -c 'docker run --rm -v $(pwd):/go/monkey-lang -w /go/monkey-lang/src monkey-lang-monkey-lang go test ./...'
+        language: system
+        pass_filenames: false
+        files: ^src/

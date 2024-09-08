@@ -117,7 +117,7 @@ func (l *Lexer) NextToken() token.Token {
 
 			return tok
 
-		// 文字が数字である限り、整数として読み込む
+			// 文字が数字である限り、整数として読み込む
 		} else if isDigit(l.ch) {
 
 			// 整数を取得する
@@ -126,7 +126,7 @@ func (l *Lexer) NextToken() token.Token {
 
 			return tok
 
-		// 英字のみでもないし、数字のみでもない場合、ILLEGALトークンとする
+			// 英字のみでもないし、数字のみでもない場合、ILLEGALトークンとする
 		} else {
 			tok = newToken(token.ILLEGAL, l.ch)
 		}
@@ -232,7 +232,7 @@ func (l *Lexer) peekChar() byte {
  * 引数: input : ソースコード文字列
  * 戻値: *Lexer
  */
- func New(input string) *Lexer {
+func New(input string) *Lexer {
 
 	// lexer構造体のポインタを返す
 	l := &Lexer{input: input}

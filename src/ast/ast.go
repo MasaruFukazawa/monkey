@@ -7,8 +7,8 @@ package ast
 
 import (
 	"bytes"
-
 	"github.com/MasaruFukazawa/monkey-lang/src/token"
+	"strings"
 )
 
 // 抽象構文木のノードのインターフェース
@@ -332,6 +332,249 @@ func (oe *InfixExpression) String() string {
 	out.WriteString(oe.Left.String())
 	out.WriteString(" " + oe.Operator + " ")
 	out.WriteString(oe.Right.String())
+	out.WriteString(")")
+
+	return out.String()
+}
+
+/**
+ *
+ * 真偽値を表すノード
+ *
+ */
+type Boolean struct {
+	Token token.Token
+	Value bool
+}
+
+/**
+ * 名前: Boolean.expressionNode
+ * 概要:
+ *	真偽値のトークンリテラルを返す
+ *	Expressionインターフェースを満たす
+ */
+func (b *Boolean) expressionNode() {}
+
+/**
+ * 名前: Boolean.TokenLiteral
+ * 概要:
+ *	真偽値のトークンリテラルを返す
+ *	TokenLiteralインターフェースを満たす
+ */
+func (b *Boolean) TokenLiteral() string {
+	return b.Token.Literal
+}
+
+/**
+ * 名前: Boolean.String
+ * 概要:
+ *	真偽値のトークンリテラルを返す
+ *	Nodeインターフェースを満たす
+ */
+func (b *Boolean) String() string {
+	return b.Token.Literal
+}
+
+/**
+ *
+ * if文を表すノード
+ *
+ */
+type IfExpression struct {
+	Token       token.Token     // 'if' トークン
+	Condition   Expression      // 条件式
+	Consequence *BlockStatement // 条件が真の場合の文
+	Alternative *BlockStatement // 条件が偽の場合の文
+}
+
+/**
+ * 名前: IfExpression.expressionNode
+ * 概要:
+ *	if文のトークンリテラルを返す
+ *	Expressionインターフェースを満たす
+ */
+func (ie *IfExpression) expressionNode() {}
+
+/**
+ * 名前: IfExpression.TokenLiteral
+ * 概要:
+ *	if文のトークンリテラルを返す
+ *	TokenLiteralインターフェースを満たす
+ */
+func (ie *IfExpression) TokenLiteral() string {
+	return ie.Token.Literal
+}
+
+/**
+ * 名前: IfExpression.String
+ * 概要:
+ *	if文のトークンリテラルを返す
+ *	Nodeインターフェースを満たす
+ */
+func (ie *IfExpression) String() string {
+
+	var out bytes.Buffer
+
+	out.WriteString("if")
+	out.WriteString(ie.Condition.String())
+	out.WriteString(" ")
+	out.WriteString(ie.Consequence.String())
+
+	if ie.Alternative != nil {
+		out.WriteString("else ")
+		out.WriteString(ie.Alternative.String())
+	}
+
+	return out.String()
+}
+
+/**
+ * 名前: BlockStatement
+ * 概要:
+ *	ブロック文を表すノード
+ *	Statementインターフェースを満たす
+ */
+type BlockStatement struct {
+	Token      token.Token // '{' トークン
+	Statements []Statement // ブロック文の中の文
+}
+
+/**
+ * 名前: BlockStatement.statementNode
+ * 概要:
+ *	BlockStatementのトークンリテラルを返す
+ *	Statementインターフェースを満たす
+ */
+func (bs *BlockStatement) statementNode() {}
+
+/**
+ * 名前: BlockStatement.TokenLiteral
+ * 概要:
+ *	BlockStatementのトークンリテラルを返す
+ *	TokenLiteralインターフェースを満たす
+ */
+func (bs *BlockStatement) TokenLiteral() string {
+	return bs.Token.Literal
+}
+
+/**
+ * 名前: BlockStatement.String
+ * 概要:
+ *	BlockStatementのトークンリテラルを返す
+ *	Nodeインターフェースを満たす
+ */
+func (bs *BlockStatement) String() string {
+
+	var out bytes.Buffer
+
+	for _, s := range bs.Statements {
+		out.WriteString(s.String())
+	}
+
+	return out.String()
+}
+
+/**
+ *
+ * 名前: 関数リテラルを表すノード
+ *
+ */
+type FunctionLiteral struct {
+	Token      token.Token     // 'fn' トークン
+	Parameters []*Identifier   // パラメータリスト
+	Body       *BlockStatement // 関数の本体
+}
+
+/**
+ * 名前: FunctionLiteral.expressionNode
+ * 概要:
+ *  関数リテラルのトークンリテラルを返す
+ * 	Expressionインターフェースを満たす
+ */
+func (fl *FunctionLiteral) expressionNode() {}
+
+/**
+ * 名前: FunctionLiteral.TokenLiteral
+ * 概要:
+ *  関数リテラルのトークンリテラルを返す
+ *	TokenLiteralインターフェースを満たす
+ */
+func (fl *FunctionLiteral) TokenLiteral() string {
+	return fl.Token.Literal
+}
+
+/**
+ * 名前: FunctionLiteral.String
+ * 概要:
+ *  関数リテラルのトークンリテラルを返す
+ *  Nodeインターフェースを満たす
+ */
+func (fl *FunctionLiteral) String() string {
+
+	var out bytes.Buffer
+
+	params := []string{}
+
+	for _, p := range fl.Parameters {
+		params = append(params, p.String())
+	}
+
+	out.WriteString(fl.TokenLiteral())
+	out.WriteString("(")
+	out.WriteString(strings.Join(params, ", "))
+	out.WriteString(") ")
+	out.WriteString(fl.Body.String())
+
+	return out.String()
+}
+
+/**
+ *
+ * 名前: 呼び出し式を表すノード
+ * 説明:
+ *  評価されたときに関数を呼び出す式
+ *  関数呼び出しのための引数となる式のリストを保持する
+ */
+type CallExpression struct {
+	Token     token.Token  // '(' トークン
+	Function  Expression   // 関数式
+	Arguments []Expression // 関数の引数
+}
+
+/**
+ * 名前: CallExpression.expressionNode
+ * 概要:
+ *  呼び出し式のトークンリテラルを返す
+ */
+func (ce *CallExpression) expressionNode() {}
+
+/**
+ * 名前: CallExpression.TokenLiteral
+ * 概要:
+ *  呼び出し式のトークンリテラルを返す
+ */
+func (ce *CallExpression) TokenLiteral() string {
+	return ce.Token.Literal
+}
+
+/**
+ * 名前: CallExpression.String
+ * 概要:
+ *  呼び出し式のトークンリテラルを返す
+ */
+func (ce *CallExpression) String() string {
+
+	var out bytes.Buffer
+
+	args := []string{}
+
+	for _, a := range ce.Arguments {
+		args = append(args, a.String())
+	}
+
+	out.WriteString(ce.Function.String())
+	out.WriteString("(")
+	out.WriteString(strings.Join(args, ", "))
 	out.WriteString(")")
 
 	return out.String()
