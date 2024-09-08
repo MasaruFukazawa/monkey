@@ -42,6 +42,7 @@ var precedences = map[token.TokenType]int{
 	token.MINUS:    SUM,         // -
 	token.SLASH:    PRODUCT,     // /
 	token.ASTERISK: PRODUCT,     // *
+	token.LPAREN:   CALL,        //
 }
 
 // 優先順位の定義
@@ -569,7 +570,7 @@ func (p *Parser) parseBlockStatement() *ast.BlockStatement {
  * 名前: Parser.parseFunctionLiteral
  * 概要: 関数リテラルを構文解析する
  * 引数: なし
- * 戻値: *ast.Expression
+ * 戻値: ast.Expression
  */
 func (p *Parser) parseFunctionLiteral() ast.Expression {
 
@@ -599,7 +600,7 @@ func (p *Parser) parseFunctionLiteral() ast.Expression {
  * 名前: Parser.parseFunctionParameters
  * 概要: 関数のパラメータを構文解析する
  * 引数: なし
- * 戻値: *ast.Identifier
+ * 戻値: []*ast.Identifier
  */
 func (p *Parser) parseFunctionParameters() []*ast.Identifier {
 
@@ -633,6 +634,59 @@ func (p *Parser) parseFunctionParameters() []*ast.Identifier {
 	}
 
 	return identifiers
+}
+
+/**
+ * 名前: Parser.parseCallExpression
+ * 概要: 呼び出し式を構文解析する
+ * 引数: ast.Expression
+ * 戻値: ast.Expression
+ */
+func (p *Parser) parseCallExpression(function ast.Expression) ast.Expression {
+
+	exp := &ast.CallExpression{Token: p.curToken, Function: function}
+
+	exp.Arguments = p.parseCallArguments()
+
+	return exp
+}
+
+/**
+ * 名前: Parser.parseCallArguments
+ * 概要: 引数リストを構文解析する
+ * 引数: なし
+ * 戻値: []ast.Expression
+ */
+func (p *Parser) parseCallArguments() []ast.Expression {
+
+	args := []ast.Expression{}
+
+	// 次のトークンがRPARENであれば、nilを返す
+	if p.peekTokenIs(token.RPAREN) {
+		p.nextToken()
+		return args
+	}
+
+	// 次のトークンへ進める
+	p.nextToken()
+
+	// 式を構文解析
+	args = append(args, p.parseExpression(LOWEST))
+
+	// 次のトークンがCOMMAであれば、繰り返す
+	for p.peekTokenIs(token.COMMA) {
+		p.nextToken()
+		p.nextToken()
+		args = append(args, p.parseExpression(LOWEST))
+	}
+
+	// 次のトークンがRPARENでなければnilを返す
+	if !p.expectPeek(token.RPAREN) {
+		return nil
+	}
+
+	return args
+
 }
 
 /**
@@ -687,6 +741,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerInfix(token.NOT_EQ, p.parseInfixExpression)
 	p.registerInfix(token.LT, p.parseInfixExpression)
 	p.registerInfix(token.GT, p.parseInfixExpression)
+	p.registerInfix(token.LPAREN, p.parseCallExpression)
 
 	p.nextToken()
 	p.nextToken()
