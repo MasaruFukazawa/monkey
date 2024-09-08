@@ -528,6 +528,58 @@ func (fl *FunctionLiteral) String() string {
 	return out.String()
 }
 
+/**
+ *
+ * 名前: 呼び出し式を表すノード
+ * 説明:
+ *  評価されたときに関数を呼び出す式
+ *  関数呼び出しのための引数となる式のリストを保持する
+ */
+type CallExpression struct {
+	Token     token.Token  // '(' トークン
+	Function  Expression   // 関数式
+	Arguments []Expression // 関数の引数
+}
+
+/**
+ * 名前: CallExpression.expressionNode
+ * 概要:
+ *  呼び出し式のトークンリテラルを返す
+ */
+func (ce *CallExpression) expressionNode() {}
+
+/**
+ * 名前: CallExpression.TokenLiteral
+ * 概要:
+ *  呼び出し式のトークンリテラルを返す
+ */
+func (ce *CallExpression) TokenLiteral() string {
+	return ce.Token.Literal
+}
+
+/**
+ * 名前: CallExpression.String
+ * 概要:
+ *  呼び出し式のトークンリテラルを返す
+ */
+func (ce *CallExpression) String() string {
+
+	var out bytes.Buffer
+
+	args := []string{}
+
+	for _, a := range ce.Arguments {
+		args = append(args, a.String())
+	}
+
+	out.WriteString(ce.Function.String())
+	out.WriteString("(")
+	out.WriteString(strings.Join(args, ", "))
+	out.WriteString(")")
+
+	return out.String()
+}
+
 // プログラム全体を表すノード
 // .. Nodeインターフェースを満たす
 type Program struct {
