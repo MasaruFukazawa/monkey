@@ -12,7 +12,7 @@ import (
 	"io"
 
 	"github.com/MasaruFukazawa/monkey-lang/src/lexer"
-	"github.com/MasaruFukazawa/monkey-lang/src/token"
+	"github.com/MasaruFukazawa/monkey-lang/src/parser"
 )
 
 const PROMPT = ">> "
@@ -29,10 +29,16 @@ func Start(in io.Reader, out io.Writer) {
 	// .. bufioパッケージのScanner構造体を使う
 	scanner := bufio.NewScanner(in)
 
-	// プロンプトを表示
-	fmt.Printf(PROMPT)
+	for {
 
-	for scanner.Scan() {
+		// プロンプトを表示
+		fmt.Printf(PROMPT)
+
+		scanned := scanner.Scan()
+
+		if !scanned {
+			return
+		}
 
 		// 入力された文字列を取変
 		// .. 1行ずつ読み込む
@@ -42,15 +48,41 @@ func Start(in io.Reader, out io.Writer) {
 		// .. 1行ずつ字句解析する
 		l := lexer.New(line)
 
-		// 字句解析を行う
-		// .. トークンを1つずつ読み込む
-		// .. EOFに達したら続ばない
-		for tok := l.NextToken(); tok.Type != token.EOF; tok = l.NextToken() {
-			// トークンを表示
-			fmt.Printf("%+v\n", tok)
+		p := parser.New(l)
+
+		program := p.ParseProgram()
+
+		if len(p.Errors()) != 0 {
+			printParserErrors(out, p.Errors())
+			continue
 		}
 
-		// プロンプトを表示
-		fmt.Printf(PROMPT)
+		io.WriteString(out, program.String())
+		io.WriteString(out, "\n")
+
+	}
+}
+
+const MONKEY_FACE = `            __,__
+   .--.  .-"     "-.  .--.
+  / .. \/  .-. .-.  \/ .. \
+ | |  '|  /   Y   \  |'  | |
+ | \   \  \ 0 | 0 /  /   / |
+  \ '- ,\.-"""""""-./, -' /
+   ''-' /_   ^ ^   _\ '-''
+       |  \._   _./  |
+       \   \ '~' /   /
+        '._ '-=-' _.'
+           '-----'
+`
+
+func printParserErrors(out io.Writer, errors []string) {
+
+	io.WriteString(out, MONKEY_FACE)
+	io.WriteString(out, "Woops! We ran into some monkey business here!\n")
+	io.WriteString(out, " parser errors:\n")
+
+	for _, msg := range errors {
+		io.WriteString(out, "\t"+msg+"\n")
 	}
 }
