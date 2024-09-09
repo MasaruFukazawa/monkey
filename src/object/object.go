@@ -12,6 +12,7 @@ type ObjectType string
 const (
 	INTEGER_OBJ = "INTEGER"
 	BOOLEAN_OBJ = "BOOLEAN"
+	NULL_OBJ    = "NULL"
 )
 
 // オブジェクトの種類を定義する
@@ -48,4 +49,17 @@ func (b *Boolean) Type() ObjectType {
 // 真偽値オブジェクトの値を返す
 func (b *Boolean) Inspect() string {
 	return fmt.Sprintf("%t", b.Value)
+}
+
+// NULLオブジェクトを表す構造体
+type Null struct{}
+
+// NULLオブジェクトの種類を返す
+func (n *Null) Type() ObjectType {
+	return NULL_OBJ
+}
+
+// NULLオブジェクトの値を返す
+func (n *Null) Inspect() string {
+	return "null"
 }
