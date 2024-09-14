@@ -5,6 +5,11 @@ import (
 	"github.com/MasaruFukazawa/monkey-lang/src/object"
 )
 
+var (
+	TRUE  = &object.Boolean{Value: true}
+	FALSE = &object.Boolean{Value: false}
+)
+
 /**
  * 関数名: Eval
  * 処理: 引数で渡された抽象構文木を評価する
@@ -23,6 +28,9 @@ func Eval(node ast.Node) object.Object {
 
 	case *ast.IntegerLiteral:
 		return &object.Integer{Value: node.Value}
+
+	case *ast.Boolean:
+		return nativeBooleanObject(node.Value)
 	}
 
 	return nil
@@ -37,4 +45,13 @@ func evalStatements(stms []ast.Statement) object.Object {
 	}
 
 	return result
+}
+
+func nativeBooleanObject(input bool) *object.Boolean {
+
+	if input {
+		return TRUE
+	}
+
+	return FALSE
 }
