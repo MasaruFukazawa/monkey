@@ -10,9 +10,10 @@ import "fmt"
 type ObjectType string
 
 const (
-	INTEGER_OBJ = "INTEGER"
-	BOOLEAN_OBJ = "BOOLEAN"
-	NULL_OBJ    = "NULL"
+	INTEGER_OBJ      = "INTEGER"
+	BOOLEAN_OBJ      = "BOOLEAN"
+	NULL_OBJ         = "NULL"
+	RETURN_VALUE_OBJ = "RETURN_VALUE"
 )
 
 // オブジェクトの種類を定義する
@@ -62,4 +63,19 @@ func (n *Null) Type() ObjectType {
 // NULLオブジェクトの値を返す
 func (n *Null) Inspect() string {
 	return "null"
+}
+
+// 戻り値オブジェクトを表す構造体
+type ReturnValue struct {
+	Value Object
+}
+
+// 戻り値オブジェクトの種類を返す
+func (rv *ReturnValue) Type() ObjectType {
+	return RETURN_VALUE_OBJ
+}
+
+// 戻り値オブジェクトの値を返す
+func (rv *ReturnValue) Inspect() string {
+	return rv.Value.Inspect()
 }
