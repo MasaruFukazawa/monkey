@@ -14,6 +14,7 @@ const (
 	BOOLEAN_OBJ      = "BOOLEAN"
 	NULL_OBJ         = "NULL"
 	RETURN_VALUE_OBJ = "RETURN_VALUE"
+	ERROR_OBJ        = "ERROR"
 )
 
 // オブジェクトの種類を定義する
@@ -78,4 +79,19 @@ func (rv *ReturnValue) Type() ObjectType {
 // 戻り値オブジェクトの値を返す
 func (rv *ReturnValue) Inspect() string {
 	return rv.Value.Inspect()
+}
+
+// エラーオブジェクトを表す構造体
+type Error struct {
+	Message string
+}
+
+// エラーオブジェクトの種類を返す
+func (e *Error) Type() ObjectType {
+	return ERROR_OBJ
+}
+
+// エラーオブジェクトの値を返す
+func (e *Error) Inspect() string {
+	return "ERROR: " + e.Message
 }
