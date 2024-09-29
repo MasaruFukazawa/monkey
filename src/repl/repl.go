@@ -13,6 +13,7 @@ import (
 
 	"github.com/MasaruFukazawa/monkey-lang/src/evaluator"
 	"github.com/MasaruFukazawa/monkey-lang/src/lexer"
+	"github.com/MasaruFukazawa/monkey-lang/src/object"
 	"github.com/MasaruFukazawa/monkey-lang/src/parser"
 )
 
@@ -29,6 +30,7 @@ func Start(in io.Reader, out io.Writer) {
 	// 入力を取変
 	// .. bufioパッケージのScanner構造体を使う
 	scanner := bufio.NewScanner(in)
+	env := object.NewEnvironment()
 
 	for {
 
@@ -58,7 +60,7 @@ func Start(in io.Reader, out io.Writer) {
 			continue
 		}
 
-		evaluated := evaluator.Eval(program)
+		evaluated := evaluator.Eval(program, env)
 
 		if evaluated != nil {
 			io.WriteString(out, evaluated.Inspect())

@@ -5,7 +5,12 @@
  */
 package object
 
-import "fmt"
+import (
+	"bytes"
+	"fmt"
+	"github.com/MasaruFukazawa/monkey-lang/src/ast"
+	"strings"
+)
 
 type ObjectType string
 
@@ -14,6 +19,8 @@ const (
 	BOOLEAN_OBJ      = "BOOLEAN"
 	NULL_OBJ         = "NULL"
 	RETURN_VALUE_OBJ = "RETURN_VALUE"
+	ERROR_OBJ        = "ERROR"
+	FUNCTION_OBJ     = "FUNCTION"
 )
 
 // オブジェクトの種類を定義する
@@ -78,4 +85,52 @@ func (rv *ReturnValue) Type() ObjectType {
 // 戻り値オブジェクトの値を返す
 func (rv *ReturnValue) Inspect() string {
 	return rv.Value.Inspect()
+}
+
+// エラーオブジェクトを表す構造体
+type Error struct {
+	Message string
+}
+
+// エラーオブジェクトの種類を返す
+func (e *Error) Type() ObjectType {
+	return ERROR_OBJ
+}
+
+// エラーオブジェクトの値を返す
+func (e *Error) Inspect() string {
+	return "ERROR: " + e.Message
+}
+
+// 関数オブジェクトを表す構造体
+type Function struct {
+	Parameters []*ast.Identifier
+	Body       *ast.BlockStatement
+	Env        *Environment
+}
+
+// 関数オブジェクトの種類を返す
+func (f *Function) Type() ObjectType {
+	return FUNCTION_OBJ
+}
+
+// 関数オブジェクトの値を返す
+func (f *Function) Inspect() string {
+
+	var out bytes.Buffer
+
+	params := []string{}
+
+	for _, p := range f.Parameters {
+		params = append(params, p.String())
+	}
+
+	out.WriteString("fn")
+	out.WriteString("(")
+	out.WriteString(strings.Join(params, ", "))
+	out.WriteString(") {")
+	out.WriteString(f.Body.String())
+	out.WriteString("¥n}")
+
+	return out.String()
 }
