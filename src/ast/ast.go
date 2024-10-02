@@ -580,6 +580,41 @@ func (ce *CallExpression) String() string {
 	return out.String()
 }
 
+/**
+ * 名前: 文字列リテラルを表すノード
+ * 説明:
+ *
+ */
+type StringLiteral struct {
+	Token token.Token // 文字列リテラルのトークン
+	Value string      // 文字列リテラルの値
+}
+
+/**
+ * 名前: StringLiteral.expressionNode
+ * 概要:
+ *  文字列リテラルのトークンリテラルを返す
+ */
+func (sl *StringLiteral) expressionNode() {}
+
+/**
+ * 名前: StringLiteral.TokenLiteral
+ * 概要:
+ *  文字列リテラルのトークンリテラルを返す
+ */
+func (sl *StringLiteral) TokenLiteral() string {
+	return sl.Token.Literal
+}
+
+/**
+ * 名前: StringLiteral.String
+ * 概要:
+ *  文字列リテラルのトークンリテラルを返す
+ */
+func (sl *StringLiteral) String() string {
+	return sl.Token.Literal
+}
+
 // プログラム全体を表すノード
 // .. Nodeインターフェースを満たす
 type Program struct {
