@@ -33,6 +33,8 @@ if (5 < 10) {
 
 10 == 10;
 10 != 9;
+"foobar"
+"foo bar"
 `
 
 	// テスト結果となるトークンの期待値を定義
@@ -140,6 +142,10 @@ if (5 < 10) {
 		{token.NOT_EQ, "!="},
 		{token.INT, "9"},
 		{token.SEMICOLON, ";"},
+
+		// 文字列リテラル
+		{token.STRING, "foobar"},
+		{token.STRING, "foo bar"},
 
 		// ファイルの終端
 		{token.EOF, ""},
