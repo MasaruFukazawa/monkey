@@ -694,6 +694,16 @@ func (p *Parser) parseCallArguments() []ast.Expression {
 }
 
 /**
+ * 名前: Parser.parseStringLiteral
+ * 概要: 文字列リテラルを構文解析する
+ * 引数: なし
+ * 戻値: []ast.Expression
+ */
+func (p *Parser) parseStringLiteral() ast.Expression {
+	return &ast.StringLiteral{Token: p.curToken, Value: p.curToken.Literal}
+}
+
+/**
  * 名前: New
  * 処理: 構文解析器のポインタを返す
  * 引数: *lexer.Lexer
@@ -730,6 +740,9 @@ func New(l *lexer.Lexer) *Parser {
 
 	// if文の構文解析
 	p.registerPrefix(token.IF, p.parseIfExpression)
+
+	// 文字列リテラルの構文解析
+	p.registerPrefix(token.STRING, p.parseStringLiteral)
 
 	// fn (関数リテラル)の構文解析
 	p.registerPrefix(token.FUNCTION, p.parseFunctionLiteral)
