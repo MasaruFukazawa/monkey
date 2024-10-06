@@ -43,6 +43,9 @@ const (
 	LBRACE = "{"
 	RBRACE = "}"
 
+	LBRACKET = "["
+	RBRACKET = "]"
+
 	// キーワード : コード上で使用する予約語
 	FUNCTION = "FUNCTION" // 関数定義
 	LET      = "LET"      // 変数定義
