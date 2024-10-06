@@ -35,6 +35,7 @@ if (5 < 10) {
 10 != 9;
 "foobar"
 "foo bar"
+[1, 2];
 `
 
 	// テスト結果となるトークンの期待値を定義
@@ -146,6 +147,14 @@ if (5 < 10) {
 		// 文字列リテラル
 		{token.STRING, "foobar"},
 		{token.STRING, "foo bar"},
+
+		// 配列リテラル
+		{token.LBRACKET, "["},
+		{token.INT, "1"},
+		{token.COMMA, ","},
+		{token.INT, "2"},
+		{token.RBRACKET, "]"},
+		{token.SEMICOLON, ";"},
 
 		// ファイルの終端
 		{token.EOF, ""},
