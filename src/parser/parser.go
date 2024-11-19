@@ -650,7 +650,7 @@ func (p *Parser) parseCallExpression(function ast.Expression) ast.Expression {
 
 	exp := &ast.CallExpression{Token: p.curToken, Function: function}
 
-	exp.Arguments = p.parseCallArguments()
+	exp.Arguments = p.parseExpressionList(token.RPAREN)
 
 	return exp
 }
@@ -704,6 +704,58 @@ func (p *Parser) parseStringLiteral() ast.Expression {
 }
 
 /**
+ * 名前: Parser.parseArrayLiteral
+ * 概要: 配列リテラルを構文解析する
+ * 引数: なし
+ * 戻値: ast.Expression
+ */
+func (p *Parser) parseArrayLiteral() ast.Expression {
+
+	array := &ast.ArrayLiteral{Token: p.curToken}
+
+	array.Elements = p.parseExpressionList(token.RBRACKET)
+
+	return array
+}
+
+/**
+ * 名前: Parser.parseExpressionList
+ * 概要: 式リストを構文解析する
+ * 引数: token.TokenType
+ * 戻値: []ast.Expression
+ */
+func (p *Parser) parseExpressionList(end token.TokenType) []ast.Expression {
+
+	list := []ast.Expression{}
+
+	// 次のトークンがendであれば、nilを返す
+	if p.peekTokenIs(end) {
+		p.nextToken()
+		return list
+	}
+
+	// 次のトークンへ進める
+	p.nextToken()
+
+	// 式を構文解析
+	list = append(list, p.parseExpression(LOWEST))
+
+	// 次のトークンがCOMMAであれば、繰り返す
+	for p.peekTokenIs(token.COMMA) {
+		p.nextToken()
+		p.nextToken()
+		list = append(list, p.parseExpression(LOWEST))
+	}
+
+	// 次のトークンがendでなければnilを返す
+	if !p.expectPeek(end) {
+		return nil
+	}
+
+	return list
+}
+
+/**
  * 名前: New
  * 処理: 構文解析器のポインタを返す
  * 引数: *lexer.Lexer
@@ -746,6 +798,9 @@ func New(l *lexer.Lexer) *Parser {
 
 	// fn (関数リテラル)の構文解析
 	p.registerPrefix(token.FUNCTION, p.parseFunctionLiteral)
+
+	// 配列リテラルの構文解析
+	p.registerPrefix(token.LBRACKET, p.parseArrayLiteral)
 
 	// 中間構文解析関数のマップを初期化
 	p.infixParseFns = make(map[token.TokenType]infixParseFn)
