@@ -615,6 +615,39 @@ func (sl *StringLiteral) String() string {
 	return sl.Token.Literal
 }
 
+/**
+ * 名前: 配列リテラルを表すノード
+ * 説明:
+ *  配列リテラルの要素を保持する
+ */
+type ArrayLiteral struct {
+	Token    token.Token // '[' トークン
+	Elements []Expression
+}
+
+func (al *ArrayLiteral) expressionNode() {}
+
+func (al *ArrayLiteral) TokenLiteral() string {
+	return al.Token.Literal
+}
+
+func (al *ArrayLiteral) String() string {
+
+	var out bytes.Buffer
+
+	elements := []string{}
+
+	for _, el := range al.Elements {
+		elements = append(elements, el.String())
+	}
+
+	out.WriteString("[")
+	out.WriteString(strings.Join(elements, ", "))
+	out.WriteString("]")
+
+	return out.String()
+}
+
 // プログラム全体を表すノード
 // .. Nodeインターフェースを満たす
 type Program struct {
