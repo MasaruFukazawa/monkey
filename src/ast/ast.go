@@ -648,6 +648,31 @@ func (al *ArrayLiteral) String() string {
 	return out.String()
 }
 
+/**
+ * 名前: 添字演算式を表すノード
+ * 説明:
+ *  配列の要素を取得するための添字演算式
+ */
+type IndexExpression struct {
+	Token token.Token // The [ token
+	Left  Expression
+	Index Expression
+}
+
+func (ie *IndexExpression) expressionNode()      {}
+func (ie *IndexExpression) TokenLiteral() string { return ie.Token.Literal }
+func (ie *IndexExpression) String() string {
+	var out bytes.Buffer
+
+	out.WriteString("(")
+	out.WriteString(ie.Left.String())
+	out.WriteString("[")
+	out.WriteString(ie.Index.String())
+	out.WriteString("])")
+
+	return out.String()
+}
+
 // プログラム全体を表すノード
 // .. Nodeインターフェースを満たす
 type Program struct {
