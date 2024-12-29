@@ -30,6 +30,8 @@ const (
 	PREFIX
 	// CALL: myFunction(X)
 	CALL
+	// array[index]
+	INDEX
 )
 
 // 優先順位のマップ
@@ -43,6 +45,7 @@ var precedences = map[token.TokenType]int{
 	token.SLASH:    PRODUCT,     // /
 	token.ASTERISK: PRODUCT,     // *
 	token.LPAREN:   CALL,        //
+	token.LBRACKET: INDEX,       //
 }
 
 // 優先順位の定義
@@ -756,6 +759,31 @@ func (p *Parser) parseExpressionList(end token.TokenType) []ast.Expression {
 }
 
 /**
+ * 名前: Parser.parseIndexExpression
+ * 概要: インデックス式を構文解析する
+ * 引数: ast.Expression
+ * 戻値: ast.Expression
+ */
+func (p *Parser) parseIndexExpression(left ast.Expression) ast.Expression {
+
+	exp := &ast.IndexExpression{Token: p.curToken, Left: left}
+
+	// 次のトークンへ進める
+	p.nextToken()
+
+	// インデックスを構文解析
+	exp.Index = p.parseExpression(LOWEST)
+
+	// 次のトークンがRBRACKETでなければnilを返す
+	if !p.expectPeek(token.RBRACKET) {
+		return nil
+	}
+
+	return exp
+
+}
+
+/**
  * 名前: New
  * 処理: 構文解析器のポインタを返す
  * 引数: *lexer.Lexer
@@ -814,6 +842,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerInfix(token.LT, p.parseInfixExpression)
 	p.registerInfix(token.GT, p.parseInfixExpression)
 	p.registerInfix(token.LPAREN, p.parseCallExpression)
+	p.registerInfix(token.LBRACKET, p.parseIndexExpression)
 
 	p.nextToken()
 	p.nextToken()
