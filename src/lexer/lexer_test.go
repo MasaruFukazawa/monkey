@@ -36,6 +36,7 @@ if (5 < 10) {
 "foobar"
 "foo bar"
 [1, 2];
+{"foo": "bar"}
 `
 
 	// テスト結果となるトークンの期待値を定義
@@ -155,6 +156,13 @@ if (5 < 10) {
 		{token.INT, "2"},
 		{token.RBRACKET, "]"},
 		{token.SEMICOLON, ";"},
+
+		// ハッシュリテラル
+		{token.LBRACE, "{"},
+		{token.STRING, "foo"},
+		{token.COLON, ":"},
+		{token.STRING, "bar"},
+		{token.RBRACE, "}"},
 
 		// ファイルの終端
 		{token.EOF, ""},

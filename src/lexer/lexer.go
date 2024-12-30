@@ -106,6 +106,8 @@ func (l *Lexer) NextToken() token.Token {
 	case '"':
 		tok.Type = token.STRING
 		tok.Literal = l.readString()
+	case ':':
+		tok = newToken(token.COLON, l.ch)
 	case 0: // ソースコードの終端に達した場合
 		tok.Literal = ""
 		tok.Type = token.EOF
