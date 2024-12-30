@@ -16,7 +16,8 @@ const (
 	IDENT = "IDENT"
 
 	// リテラル : 扱うデータの型
-	INT = "INT"
+	INT    = "INT"
+	STRING = "STRING"
 
 	// 演算子 : 使用できる演算子
 	ASSIGN   = "="
@@ -41,6 +42,11 @@ const (
 
 	LBRACE = "{"
 	RBRACE = "}"
+
+	LBRACKET = "["
+	RBRACKET = "]"
+
+	COLON = ":"
 
 	// キーワード : コード上で使用する予約語
 	FUNCTION = "FUNCTION" // 関数定義

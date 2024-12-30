@@ -580,6 +580,130 @@ func (ce *CallExpression) String() string {
 	return out.String()
 }
 
+/**
+ * 名前: 文字列リテラルを表すノード
+ * 説明:
+ *
+ */
+type StringLiteral struct {
+	Token token.Token // 文字列リテラルのトークン
+	Value string      // 文字列リテラルの値
+}
+
+/**
+ * 名前: StringLiteral.expressionNode
+ * 概要:
+ *  文字列リテラルのトークンリテラルを返す
+ */
+func (sl *StringLiteral) expressionNode() {}
+
+/**
+ * 名前: StringLiteral.TokenLiteral
+ * 概要:
+ *  文字列リテラルのトークンリテラルを返す
+ */
+func (sl *StringLiteral) TokenLiteral() string {
+	return sl.Token.Literal
+}
+
+/**
+ * 名前: StringLiteral.String
+ * 概要:
+ *  文字列リテラルのトークンリテラルを返す
+ */
+func (sl *StringLiteral) String() string {
+	return sl.Token.Literal
+}
+
+/**
+ * 名前: 配列リテラルを表すノード
+ * 説明:
+ *  配列リテラルの要素を保持する
+ */
+type ArrayLiteral struct {
+	Token    token.Token // '[' トークン
+	Elements []Expression
+}
+
+func (al *ArrayLiteral) expressionNode() {}
+
+func (al *ArrayLiteral) TokenLiteral() string {
+	return al.Token.Literal
+}
+
+func (al *ArrayLiteral) String() string {
+
+	var out bytes.Buffer
+
+	elements := []string{}
+
+	for _, el := range al.Elements {
+		elements = append(elements, el.String())
+	}
+
+	out.WriteString("[")
+	out.WriteString(strings.Join(elements, ", "))
+	out.WriteString("]")
+
+	return out.String()
+}
+
+/**
+ * 名前: 添字演算式を表すノード
+ * 説明:
+ *  配列の要素を取得するための添字演算式
+ */
+type IndexExpression struct {
+	Token token.Token // The [ token
+	Left  Expression
+	Index Expression
+}
+
+func (ie *IndexExpression) expressionNode()      {}
+func (ie *IndexExpression) TokenLiteral() string { return ie.Token.Literal }
+func (ie *IndexExpression) String() string {
+	var out bytes.Buffer
+
+	out.WriteString("(")
+	out.WriteString(ie.Left.String())
+	out.WriteString("[")
+	out.WriteString(ie.Index.String())
+	out.WriteString("])")
+
+	return out.String()
+}
+
+/**
+ * 名前: ハッシュリテラルを表すノード
+ * 説明:
+ *  ハッシュリテラルの要素を保持する
+ */
+type HashLiteral struct {
+	Token token.Token               // '{' トークン
+	Pairs map[Expression]Expression // ハッシュリテラルの要素
+}
+
+func (hl *HashLiteral) expressionNode() {}
+func (hl *HashLiteral) TokenLiteral() string {
+	return hl.Token.Literal
+}
+func (hl *HashLiteral) String() string {
+
+	var out bytes.Buffer
+
+	pairs := []string{}
+
+	for key, value := range hl.Pairs {
+		pairs = append(pairs, key.String()+":"+value.String())
+	}
+
+	out.WriteString("{")
+	out.WriteString(strings.Join(pairs, ", "))
+	out.WriteString("}")
+
+	return out.String()
+}
+
 // プログラム全体を表すノード
 // .. Nodeインターフェースを満たす
 type Program struct {

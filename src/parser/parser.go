@@ -30,6 +30,8 @@ const (
 	PREFIX
 	// CALL: myFunction(X)
 	CALL
+	// array[index]
+	INDEX
 )
 
 // 優先順位のマップ
@@ -43,6 +45,7 @@ var precedences = map[token.TokenType]int{
 	token.SLASH:    PRODUCT,     // /
 	token.ASTERISK: PRODUCT,     // *
 	token.LPAREN:   CALL,        //
+	token.LBRACKET: INDEX,       //
 }
 
 // 優先順位の定義
@@ -650,7 +653,7 @@ func (p *Parser) parseCallExpression(function ast.Expression) ast.Expression {
 
 	exp := &ast.CallExpression{Token: p.curToken, Function: function}
 
-	exp.Arguments = p.parseCallArguments()
+	exp.Arguments = p.parseExpressionList(token.RPAREN)
 
 	return exp
 }
@@ -694,6 +697,134 @@ func (p *Parser) parseCallArguments() []ast.Expression {
 }
 
 /**
+ * 名前: Parser.parseStringLiteral
+ * 概要: 文字列リテラルを構文解析する
+ * 引数: なし
+ * 戻値: []ast.Expression
+ */
+func (p *Parser) parseStringLiteral() ast.Expression {
+	return &ast.StringLiteral{Token: p.curToken, Value: p.curToken.Literal}
+}
+
+/**
+ * 名前: Parser.parseArrayLiteral
+ * 概要: 配列リテラルを構文解析する
+ * 引数: なし
+ * 戻値: ast.Expression
+ */
+func (p *Parser) parseArrayLiteral() ast.Expression {
+
+	array := &ast.ArrayLiteral{Token: p.curToken}
+
+	array.Elements = p.parseExpressionList(token.RBRACKET)
+
+	return array
+}
+
+/**
+ * 名前: Parser.parseExpressionList
+ * 概要: 式リストを構文解析する
+ * 引数: token.TokenType
+ * 戻値: []ast.Expression
+ */
+func (p *Parser) parseExpressionList(end token.TokenType) []ast.Expression {
+
+	list := []ast.Expression{}
+
+	// 次のトークンがendであれば、nilを返す
+	if p.peekTokenIs(end) {
+		p.nextToken()
+		return list
+	}
+
+	// 次のトークンへ進める
+	p.nextToken()
+
+	// 式を構文解析
+	list = append(list, p.parseExpression(LOWEST))
+
+	// 次のトークンがCOMMAであれば、繰り返す
+	for p.peekTokenIs(token.COMMA) {
+		p.nextToken()
+		p.nextToken()
+		list = append(list, p.parseExpression(LOWEST))
+	}
+
+	// 次のトークンがendでなければnilを返す
+	if !p.expectPeek(end) {
+		return nil
+	}
+
+	return list
+}
+
+/**
+ * 名前: Parser.parseIndexExpression
+ * 概要: インデックス式を構文解析する
+ * 引数: ast.Expression
+ * 戻値: ast.Expression
+ */
+func (p *Parser) parseIndexExpression(left ast.Expression) ast.Expression {
+
+	exp := &ast.IndexExpression{Token: p.curToken, Left: left}
+
+	// 次のトークンへ進める
+	p.nextToken()
+
+	// インデックスを構文解析
+	exp.Index = p.parseExpression(LOWEST)
+
+	// 次のトークンがRBRACKETでなければnilを返す
+	if !p.expectPeek(token.RBRACKET) {
+		return nil
+	}
+
+	return exp
+
+}
+
+/**
+ * 名前: Parser.parseHashLiteral
+ * 概要: ハッシュリテラルを構文解析する
+ * 引数: ast.Expression
+ * 戻値: ast.Expression
+ */
+func (p *Parser) parseHashLiteral() ast.Expression {
+
+	hash := &ast.HashLiteral{Token: p.curToken}
+
+	hash.Pairs = make(map[ast.Expression]ast.Expression)
+
+	for !p.peekTokenIs(token.RBRACE) {
+
+		p.nextToken()
+
+		key := p.parseExpression(LOWEST)
+
+		if !p.expectPeek(token.COLON) {
+			return nil
+		}
+
+		p.nextToken()
+
+		value := p.parseExpression(LOWEST)
+
+		hash.Pairs[key] = value
+
+		if !p.peekTokenIs(token.RBRACE) && !p.expectPeek(token.COMMA) {
+			return nil
+		}
+
+	}
+
+	if !p.expectPeek(token.RBRACE) {
+		return nil
+	}
+
+	return hash
+}
+
+/**
  * 名前: New
  * 処理: 構文解析器のポインタを返す
  * 引数: *lexer.Lexer
@@ -731,8 +862,17 @@ func New(l *lexer.Lexer) *Parser {
 	// if文の構文解析
 	p.registerPrefix(token.IF, p.parseIfExpression)
 
+	// 文字列リテラルの構文解析
+	p.registerPrefix(token.STRING, p.parseStringLiteral)
+
 	// fn (関数リテラル)の構文解析
 	p.registerPrefix(token.FUNCTION, p.parseFunctionLiteral)
+
+	// 配列リテラルの構文解析
+	p.registerPrefix(token.LBRACKET, p.parseArrayLiteral)
+
+	// ハッシュリテラルの構文解析
+	p.registerPrefix(token.LBRACE, p.parseHashLiteral)
 
 	// 中間構文解析関数のマップを初期化
 	p.infixParseFns = make(map[token.TokenType]infixParseFn)
@@ -746,6 +886,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerInfix(token.LT, p.parseInfixExpression)
 	p.registerInfix(token.GT, p.parseInfixExpression)
 	p.registerInfix(token.LPAREN, p.parseCallExpression)
+	p.registerInfix(token.LBRACKET, p.parseIndexExpression)
 
 	p.nextToken()
 	p.nextToken()

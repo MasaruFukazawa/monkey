@@ -33,6 +33,10 @@ if (5 < 10) {
 
 10 == 10;
 10 != 9;
+"foobar"
+"foo bar"
+[1, 2];
+{"foo": "bar"}
 `
 
 	// テスト結果となるトークンの期待値を定義
@@ -140,6 +144,25 @@ if (5 < 10) {
 		{token.NOT_EQ, "!="},
 		{token.INT, "9"},
 		{token.SEMICOLON, ";"},
+
+		// 文字列リテラル
+		{token.STRING, "foobar"},
+		{token.STRING, "foo bar"},
+
+		// 配列リテラル
+		{token.LBRACKET, "["},
+		{token.INT, "1"},
+		{token.COMMA, ","},
+		{token.INT, "2"},
+		{token.RBRACKET, "]"},
+		{token.SEMICOLON, ";"},
+
+		// ハッシュリテラル
+		{token.LBRACE, "{"},
+		{token.STRING, "foo"},
+		{token.COLON, ":"},
+		{token.STRING, "bar"},
+		{token.RBRACE, "}"},
 
 		// ファイルの終端
 		{token.EOF, ""},
