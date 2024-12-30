@@ -784,6 +784,47 @@ func (p *Parser) parseIndexExpression(left ast.Expression) ast.Expression {
 }
 
 /**
+ * 名前: Parser.parseHashLiteral
+ * 概要: ハッシュリテラルを構文解析する
+ * 引数: ast.Expression
+ * 戻値: ast.Expression
+ */
+func (p *Parser) parseHashLiteral() ast.Expression {
+
+	hash := &ast.HashLiteral{Token: p.curToken}
+
+	hash.Pairs = make(map[ast.Expression]ast.Expression)
+
+	for !p.peekTokenIs(token.RBRACE) {
+
+		p.nextToken()
+
+		key := p.parseExpression(LOWEST)
+
+		if !p.expectPeek(token.COLON) {
+			return nil
+		}
+
+		p.nextToken()
+
+		value := p.parseExpression(LOWEST)
+
+		hash.Pairs[key] = value
+
+		if !p.peekTokenIs(token.RBRACE) && !p.expectPeek(token.COMMA) {
+			return nil
+		}
+
+	}
+
+	if !p.expectPeek(token.RBRACE) {
+		return nil
+	}
+
+	return hash
+}
+
+/**
  * 名前: New
  * 処理: 構文解析器のポインタを返す
  * 引数: *lexer.Lexer
@@ -829,6 +870,9 @@ func New(l *lexer.Lexer) *Parser {
 
 	// 配列リテラルの構文解析
 	p.registerPrefix(token.LBRACKET, p.parseArrayLiteral)
+
+	// ハッシュリテラルの構文解析
+	p.registerPrefix(token.LBRACE, p.parseHashLiteral)
 
 	// 中間構文解析関数のマップを初期化
 	p.infixParseFns = make(map[token.TokenType]infixParseFn)
